@@ -59,7 +59,7 @@ class DanmakuLayer extends React.Component {
             bvId: null,
             danmakuList: null,
             timeStamp: 0,
-            // screen: new BulletScreen('.screen', {duration: 20}),
+            screen: null
         }
         this.tryGetDanmaku()
         // TODO: sendMessage to background, background start the actual request and store contents in localStorage,
@@ -94,6 +94,7 @@ class DanmakuLayer extends React.Component {
                             }
                             return 0;
                         })
+                        this.state.screen = new BulletScreen('screen', {duration: 20})
                     }
                     console.log('success')
                     console.log(this.state.danmakuList)
@@ -141,10 +142,15 @@ parentVideoContainer.appendChild(abstractLayer)
 const videoTitle = document.getElementsByName('title')
 const currentVideoName = videoTitle.innerHTML
 
-const instanceLayer = ReactDOM.render(<DanmakuLayer value={currentVideoName}/>, abstractLayer);
+let instanceLayer = <DanmakuLayer value={currentVideoName}/>
+ReactDOM.render(instanceLayer, abstractLayer);
 
 const VT = document.getElementById('movie_player')
 let playBackIndex = 0
+
+setTimeout(() => {
+    console.log(VT.getCurrentTime)
+}, 20000)
 
 function pushDanmaku() {
     const timeStamp = VT.getCurrentTime()
