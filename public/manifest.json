@@ -1,11 +1,12 @@
 {
   "name": "All In Danmaku",
-  "version": "0.1.0",
+  "version": "0.1.10",
   "description": "Turn all danmaku together!",
   "manifest_version": 3,
   "permissions": [
     "storage",
-    "activeTab"
+    "activeTab",
+    "tabs"
   ],
   "icons": {
     "16": "images/icon.png",
@@ -27,11 +28,9 @@
   },
   "content_scripts": [
     {
-      "matches": ["http://*.qmcurtis.me/*"],
-      "css": ["static/css/content.css"],
+      "matches": ["http://*.qmcurtis.me/*", "https://*.youtube.com/watch*"],
       "js": ["static/js/content.js"],
-      "run_at": "document_idle"
+      "css": ["static/css/content.css"]
     }
-  ],
-  "web_accessible_resources": ["insert.js"]
+  ]
 }
