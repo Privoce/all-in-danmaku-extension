@@ -30,7 +30,8 @@
     {
       "matches": ["http://*.qmcurtis.me/*", "https://*.youtube.com/watch*"],
       "js": ["static/js/content.js"],
-      "css": ["static/css/content.css"]
+      "css": ["static/css/content.css"],
+      "run_at": "document_end"
     }
   ]
 }

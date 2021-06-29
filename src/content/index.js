@@ -5,6 +5,18 @@ import './index.css'
 import {fetchDanmaku} from "@/api/danmaku";
 import BulletScreen, {StyledBullet} from "rc-bullets";
 
+const YoutubePlayerState = {
+    "UNSTARTED": -1,
+    "ENDED": 0,
+    "PLAYING": 1,
+    "PAUSED": 2,
+    "BUFFERING": 3,
+    "VIDEO_CUED": 5
+};
+
+const VT = document.getElementById('movie_player')
+let playBackIndex = 0
+
 console.log("Hello World");
 
 let value = "test";
@@ -59,9 +71,10 @@ class DanmakuLayer extends React.Component {
             bvId: null,
             danmakuList: null,
             timeStamp: 0,
-            screen: null
+            screen: null,
+            intervalID: null
         }
-        this.tryGetDanmaku()
+        // this.tryGetDanmaku()
         // TODO: sendMessage to background, background start the actual request and store contents in localStorage,
         //  then tab.sendMessage to content script. When caught tab message with current bvID, fetching danmaku contents
         //  from localStorage
@@ -75,6 +88,10 @@ class DanmakuLayer extends React.Component {
         )
     }
 
+    componentDidMount() {
+        this.tryGetDanmaku()
+    }
+
     tryGetDanmaku() {
         this.state.bvId = 'BV1F54y1G7mi'
         //TODO: do some search
@@ -84,7 +101,7 @@ class DanmakuLayer extends React.Component {
         chrome.runtime.sendMessage(this.state.bvId, (response) => {
             if (response.farewell === 'success') {
                 chrome.storage.local.get(['danmakuData'], (result) => {
-                    this.state.danmakuList = result.danmakuData
+                    this.setState({danmakuList: result.danmakuData})
                     if (Array.isArray(this.state.danmakuList)) {
                         this.state.danmakuList.sort((a, b) => {
                             if (a.progress < b.progress) {
@@ -94,7 +111,8 @@ class DanmakuLayer extends React.Component {
                             }
                             return 0;
                         })
-                        this.state.screen = new BulletScreen('screen', {duration: 20})
+                        this.state.screen = new BulletScreen(document.querySelector('.screen'), {duration: 20})
+                        // this.state.screen.push(this.state.danmakuList[0].content)
                     }
                     console.log('success')
                     console.log(this.state.danmakuList)
@@ -127,7 +145,7 @@ class DanmakuLayer extends React.Component {
             ) : (
                 <div className='danmaku-container'></div>
             )*/
-            <div className='screen' style={{width: '100vw', height: '80vh'}}></div>
+            <div className='screen' style={{width: '100vw', height: '80vh', zIndex: 15}}></div>
         )
     }
 }
@@ -142,25 +160,35 @@ parentVideoContainer.appendChild(abstractLayer)
 const videoTitle = document.getElementsByName('title')
 const currentVideoName = videoTitle.innerHTML
 
-let instanceLayer = <DanmakuLayer value={currentVideoName}/>
-ReactDOM.render(instanceLayer, abstractLayer);
+// let instanceLayer = 0;
+ReactDOM.render(<DanmakuLayer value={currentVideoName}/>, abstractLayer);
 
-const VT = document.getElementById('movie_player')
-let playBackIndex = 0
 
-setTimeout(() => {
-    console.log(VT.getCurrentTime)
-}, 20000)
 
-function pushDanmaku() {
+VT.addEventListener('onStateChange', 'danmakuControl')
+function danmakuControl(playerStateCode) {
+    switch (playerStateCode) {
+        case YoutubePlayerState.PLAYING:
+            // do something
+        case YoutubePlayerState.PAUSED:
+            // do something
+        default:
+            // do other things
+    }
+}
+/*setTimeout(() => {
+    console.log(VT.getCurrentTime())
+}, 20000)*/
+
+/*function pushDanmaku() {
     const timeStamp = VT.getCurrentTime()
     const newIndex = instanceLayer.state.danmakuList.findIndex((element) =>
         element.progress > Math.floor(timeStamp * 1000)
     )
     while (playBackIndex < newIndex) {
-        instanceLayer.state.screen.push(/*this danmaku body*/)
+        instanceLayer.state.screen.push()
         playBackIndex += 1
     }
-}
+}*/
 
 // let danmakuInterval = setInterval(pushDanmaku, 5)
