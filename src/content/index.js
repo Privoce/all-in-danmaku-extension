@@ -14,7 +14,23 @@ const YoutubePlayerState = {
     "VIDEO_CUED": 5
 };
 
-const VT = document.getElementById('movie_player')
+function getVideoPlayer() {
+    let videos = Array.from(document.querySelectorAll('video')).filter((v) => !!v.src);
+    let largestVideoSize = 0;
+    let video = videos[0] || null;
+
+    for (let i = 0; i < videos.length; ++i) {
+        let rect = video.getBoundingClientRect();
+        let size = rect.height * rect.width;
+        if (size > largestVideoSize) {
+            largestVideoSize = size;
+            video = videos[i];
+        }
+    }
+    return video;
+}
+
+const VT = getVideoPlayer()
 let playBackIndex = 0
 
 console.log("Hello World");
@@ -80,16 +96,39 @@ class DanmakuLayer extends React.Component {
         //  from localStorage
     }
 
-    renderDanmaku(singleDanmaku) {
-        return (
-            <Danmaku
-                value={singleDanmaku}
-            />
-        )
-    }
-
     componentDidMount() {
         this.tryGetDanmaku()
+        VT.onpause = () => {
+            console.log('pause')
+            this.state.screen.pause()
+        }
+        VT.onplay = () => {
+            console.log('play')
+            this.state.screen.resume()
+        }
+        VT.ontimeupdate = () => {
+            const newIndex = this.state.danmakuList.findIndex((element) =>
+                element.progress > Math.floor(VT.currentTime * 1000)
+            )
+            if (newIndex === -1) return;
+            if (this.state.danmakuList[newIndex].progress - this.state.danmakuList[playBackIndex].progress > 10000
+                || newIndex <= playBackIndex) { // 10s
+                console.log('refresh')
+                this.state.screen.clear()
+                playBackIndex = newIndex
+
+            } else {
+                console.log('push')
+                while (playBackIndex < newIndex) {
+                    this.state.screen.push(<StyledBullet msg={this.state.danmakuList}/>)
+                    playBackIndex += 1
+                }
+            }
+        }
+    }
+
+    onSwitchClicked() {
+
     }
 
     tryGetDanmaku() {
@@ -112,7 +151,7 @@ class DanmakuLayer extends React.Component {
                             return 0;
                         })
                         this.state.screen = new BulletScreen(document.querySelector('.screen'), {duration: 20})
-                        // this.state.screen.push(this.state.danmakuList[0].content)
+                        this.state.screen.push(<StyledBullet msg={this.state.danmakuList[0].content} />)
                     }
                     console.log('success')
                     console.log(this.state.danmakuList)
@@ -163,28 +202,13 @@ const currentVideoName = videoTitle.innerHTML
 // let instanceLayer = 0;
 ReactDOM.render(<DanmakuLayer value={currentVideoName}/>, abstractLayer);
 
-
-
-VT.addEventListener('onStateChange', 'danmakuControl')
-function danmakuControl(playerStateCode) {
-    switch (playerStateCode) {
-        case YoutubePlayerState.PLAYING:
-            // do something
-        case YoutubePlayerState.PAUSED:
-            // do something
-        default:
-            // do other things
-    }
-}
 /*setTimeout(() => {
     console.log(VT.getCurrentTime())
 }, 20000)*/
 
 /*function pushDanmaku() {
     const timeStamp = VT.getCurrentTime()
-    const newIndex = instanceLayer.state.danmakuList.findIndex((element) =>
-        element.progress > Math.floor(timeStamp * 1000)
-    )
+
     while (playBackIndex < newIndex) {
         instanceLayer.state.screen.push()
         playBackIndex += 1
