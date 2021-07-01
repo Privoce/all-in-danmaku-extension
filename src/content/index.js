@@ -54,7 +54,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 })
 
-function rgbHex (value, prefix) {
+/*function rgbHex (value, prefix) {
     let codex = parseInt(value);
     let prefix_ = prefix || '';
     if (codex < 0) {
@@ -62,7 +62,7 @@ function rgbHex (value, prefix) {
     }
     let hex = codex.toString(16);
     return prefix_ + (Array(6).join('0') + hex).slice(-6);
-}
+}*/
 
 
 /*class Danmaku extends React.Component {
@@ -135,7 +135,7 @@ class DanmakuLayer extends React.Component {
                         <StyledBullet
                             msg={this.state.danmakuList[playBackIndex].content}
                             size='small'
-                            color={rgbHex(this.state.danmakuList[playBackIndex].color, '#')}
+                            color={this.state.danmakuList[playBackIndex].color}
                         />
                     );
                     playBackIndex += 1;
