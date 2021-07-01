@@ -54,6 +54,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 })
 
+function rgbHex (value, prefix) {
+    let codex = parseInt(value);
+    let prefix_ = prefix || '';
+    if (codex < 0) {
+        codex = (256 * 256 * 256) + codex;
+    }
+    let hex = codex.toString(16);
+    return prefix_ + (Array(6).join('0') + hex).slice(-6);
+}
+
+
 /*class Danmaku extends React.Component {
     constructor(props) {
         super(props);
@@ -112,7 +123,7 @@ class DanmakuLayer extends React.Component {
             )
             if (newIndex === -1) return;
             if (this.state.danmakuList[newIndex].progress - this.state.danmakuList[playBackIndex].progress > 10000
-                || newIndex <= playBackIndex) { // 10s
+                || newIndex < playBackIndex) { // 10s
                 console.log('refresh')
                 this.state.screen.clear()
                 playBackIndex = newIndex
@@ -120,8 +131,14 @@ class DanmakuLayer extends React.Component {
             } else {
                 console.log('push')
                 while (playBackIndex < newIndex) {
-                    this.state.screen.push(<StyledBullet msg={this.state.danmakuList}/>)
-                    playBackIndex += 1
+                    this.state.screen.push(
+                        <StyledBullet
+                            msg={this.state.danmakuList[playBackIndex].content}
+                            size='small'
+                            color={rgbHex(this.state.danmakuList[playBackIndex].color, '#')}
+                        />
+                    );
+                    playBackIndex += 1;
                 }
             }
         }
@@ -150,7 +167,7 @@ class DanmakuLayer extends React.Component {
                             }
                             return 0;
                         })
-                        this.state.screen = new BulletScreen(document.querySelector('.screen'), {duration: 20})
+                        this.state.screen = new BulletScreen(document.querySelector('.screen'), {duration: 10})
                         this.state.screen.push(<StyledBullet msg={this.state.danmakuList[0].content} />)
                     }
                     console.log('success')
@@ -167,23 +184,7 @@ class DanmakuLayer extends React.Component {
     }
 
     render() {
-        /*const listDiv = document.createElement('div')
-        listDiv.id = 'danmaku-list-div'
-        if (Array.isArray(this.state.danmakuList)) {
-            for (let i = 0; i < this.state.danmakuList.length; i++) {
-                const newDanmaku = this.renderDanmaku(i)
-                listDiv.appendChild(newDanmaku)
-            }
-        }
-        return listDiv*/
         return (
-            /*Array.isArray(this.state.danmakuList) ? (
-                <div className='danmaku-container'>
-                    {this.state.danmakuList.map((danmaku) => this.renderDanmaku(danmaku))}
-                </div>
-            ) : (
-                <div className='danmaku-container'></div>
-            )*/
             <div className='screen' style={{width: '100vw', height: '80vh', zIndex: 15}}></div>
         )
     }
