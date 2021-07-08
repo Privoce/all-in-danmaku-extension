@@ -4,6 +4,29 @@ import ReactDOM from 'react-dom'
 import './index.css'
 import {fetchDanmaku} from "@/api/danmaku";
 import BulletScreen, {StyledBullet} from "rc-bullets";
+import {Drawer, makeStyles} from "@material-ui/core";
+import SwipeableDrawer from "@material-ui/core/SwipeableDrawer";
+import List from "@material-ui/core/List"
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import Divider from "@material-ui/core/Divider";
+import Switch from "@material-ui/core/Switch";
+import FormGroup from "@material-ui/core/FormGroup"
+import FormControlLabel from "@material-ui/core/FormControlLabel"
+import Dialog from "@material-ui/core/Dialog"
+import DialogTitle from "@material-ui/core/DialogTitle"
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent"
+import DialogContentText from "@material-ui/core/DialogContentText";
+import Button from "@material-ui/core/Button"
+import IconButton from "@material-ui/core/IconButton"
+import Tabs from "@material-ui/core/Tabs"
+import Tab from "@material-ui/core/Tab"
+import MenuIcon from "@material-ui/icons/Menu"
+import SearchIcon from "@material-ui/icons/Search"
+import ListIcon from "@material-ui/icons/List"
+import ReplayIcon from "@material-ui/icons/Replay"
+
 
 const YoutubePlayerState = {
     "UNSTARTED": -1,
@@ -60,30 +83,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 })
 
-/*function rgbHex (value, prefix) {
-    let codex = parseInt(value);
-    let prefix_ = prefix || '';
-    if (codex < 0) {
-        codex = (256 * 256 * 256) + codex;
-    }
-    let hex = codex.toString(16);
-    return prefix_ + (Array(6).join('0') + hex).slice(-6);
-}*/
 
-
-/*class Danmaku extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
-    render(i) {
-        return (
-            <div className='danmaku-content' id={i}>
-                {this.props.text}
-            </div>
-        )
-    }
-}*/
 function Danmaku(props) {
     const divStyle = {
         color: props.value.color, //TODO: to hex color
@@ -99,7 +99,6 @@ function Danmaku(props) {
 function PageSwitcher(props) {
     return (
         <div className="danmaku-page-switcher" style={{marginTop: '10px'}}>
-            <span className="switcher-text">Danmaku Switcher:</span>
             <div className="danmaku-page-switcher-inner">
                 <label className="switch" style={{marginLeft: '5px'}}>
                     <input type="checkbox" id="all-in-danmaku-switcher"/>
@@ -116,7 +115,7 @@ const referenceBar = document.getElementById('info-contents')
 toolBar.id = 'all-in-danmaku-toolbar'
 infoBar.insertBefore(toolBar, referenceBar)
 
-ReactDOM.render(<PageSwitcher />, toolBar)
+// ReactDOM.render(<PageSwitcher />, toolBar)
 
 const switcher = document.getElementById('all-in-danmaku-switcher')
 
@@ -124,12 +123,12 @@ class DanmakuLayer extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            videoName: props.value,
+            // videoName: props.value,
             bvId: null,
             danmakuList: null,
-            timeStamp: 0,
+            // timeStamp: 0,
             screen: null,
-            intervalID: null,
+            // intervalID: null,
             width: '500px',
             height: '300px'
         }
@@ -268,6 +267,123 @@ class DanmakuLayer extends React.Component {
     }
 }
 
+const sidebarStyle = makeStyles({
+    list: {
+        width: 400
+    }
+})
+
+class DanmakuSidebar extends React.Component {
+    constructor(props) {
+        super(props);
+        // this.classes = sidebarStyle();
+        this.state = {
+            videoName: props.value,
+            display: false,
+        }
+    }
+
+    toggleSidebar(open) {
+        return (event) => {
+            if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+                return;
+            }
+            this.setState({
+                display: open
+            });
+        }
+    }
+
+    renderList() {
+        return (
+            <div
+                className="danmaku-sidebar"
+                role="presentation"
+                onKeyDown={this.toggleSidebar(false)}
+            >
+                <Tabs className="tab-space-holder">
+
+                </Tabs>
+                <Tabs
+                    variant="fullWidth"
+                >
+                    <Tab label="Danmaku List" />
+                </Tabs>
+                <List dense={true}>
+                    <ListItem disabled={true}>
+                        <ListItemText primary="Content" />
+                    </ListItem>
+                </List>
+            </div>
+        )
+    }
+
+    render() {
+        return (
+                <div>
+                    <React.Fragment key={'right'}>
+                        <IconButton onClick={this.toggleSidebar(true)} style={{padding: 10}}>
+                            <ListIcon />
+                        </IconButton>
+                        <Drawer anchor={'right'} open={this.state.display} onClose={this.toggleSidebar(false)}>
+                            {this.renderList()}
+                        </Drawer>
+                    </React.Fragment>
+                </div>
+            )
+
+    }
+}
+
+class DanmakuSearchDialog extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            open: false
+        }
+    }
+
+    toggleDialog(open) {
+
+    }
+
+    renderDialog() {
+
+    }
+
+    render() {
+        return (
+            <div>
+                <IconButton onClick={this.toggleDialog(true)}>
+                    <ReplayIcon />
+                </IconButton>
+                <Dialog open={this.state.open}>
+
+                </Dialog>
+            </div>
+
+        )
+    }
+}
+
+function DanmakuToolBar(props) {
+    return (
+        <div className="danmaku-toolbar">
+            <div className="toolbar-left">
+                <PageSwitcher />
+            </div>
+            <div className="toolbar-middle">
+
+            </div>
+            <div className="toolbar-right">
+                <DanmakuSidebar />
+            </div>
+
+        </div>
+    )
+}
+
+ReactDOM.render(<DanmakuToolBar />, toolBar)
 
 const parentVideoContainer = document.querySelector(".html5-video-container")
 const abstractLayer = document.createElement('div')

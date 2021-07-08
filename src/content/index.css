@@ -68,3 +68,22 @@ input:checked + .slider:before {
 .slider.round:before {
     border-radius: 50%;
 }
+
+.danmaku-sidebar {
+    width: 400px;
+}
+
+.danmaku-toolbar {
+    display: flex;
+}
+
+.toolbar-left {
+    flex: 1 1 auto;
+}
+
+.toolbar-middle {
+    flex: 2 1 auto;
+}
+.toolbar-right {
+    flex: 1 1 auto;
+}

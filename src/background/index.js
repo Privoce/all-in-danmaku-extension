@@ -4,7 +4,7 @@ import axios from "axios";
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log('bvID received.')
-    let url = 'http://ec2-18-163-238-71.ap-east-1.compute.amazonaws.com:8080' + '?bvid=' + message
+    let url = 'http://ec2-18-163-238-71.ap-east-1.compute.amazonaws.com' + '?bvid=' + message
     console.log(url)
     let myRequest = new Request(url, {
         method: 'GET',
