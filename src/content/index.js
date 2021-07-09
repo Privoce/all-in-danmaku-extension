@@ -26,7 +26,9 @@ import MenuIcon from "@material-ui/icons/Menu"
 import SearchIcon from "@material-ui/icons/Search"
 import ListIcon from "@material-ui/icons/List"
 import ReplayIcon from "@material-ui/icons/Replay"
-
+import Paper from '@material-ui/core/Paper';
+import DirectionsIcon from '@material-ui/icons/Directions';
+import InputBase from '@material-ui/core/InputBase';
 
 const YoutubePlayerState = {
     "UNSTARTED": -1,
@@ -335,6 +337,55 @@ class DanmakuSidebar extends React.Component {
     }
 }
 
+const SendBarStyle = makeStyles((theme) => ({
+    root: {
+        padding: '2px 4px',
+        display: 'flex',
+        alignItems: 'center',
+        width: 400,
+    },
+    input: {
+        marginLeft: theme.spacing(1),
+        flex: 1,
+    },
+    iconButton: {
+        padding: 10,
+    },
+    divider: {
+        height: 28,
+        margin: 4,
+    },
+}));
+
+class DanmakuSendBar extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+    render() {
+        const classes = SendBarStyle();
+
+        return (
+            <Paper component="form" className={classes.root}>
+                <IconButton className={classes.iconButton} aria-label="menu">
+                    <MenuIcon />
+                </IconButton>
+                <InputBase
+                    className={classes.input}
+                    placeholder="Search Google Maps"
+                    inputProps={{ 'aria-label': 'search google maps' }}
+                />
+                <IconButton type="submit" className={classes.iconButton} aria-label="search">
+                    <SearchIcon />
+                </IconButton>
+                <Divider className={classes.divider} orientation="vertical" />
+                <IconButton color="primary" className={classes.iconButton} aria-label="directions">
+                    <DirectionsIcon />
+                </IconButton>
+            </Paper>
+        );
+    }
+}
+
 class DanmakuSearchDialog extends React.Component {
     constructor(props) {
         super(props);
@@ -373,7 +424,7 @@ function DanmakuToolBar(props) {
                 <PageSwitcher />
             </div>
             <div className="toolbar-middle">
-
+                <DanmakuSendBar />
             </div>
             <div className="toolbar-right">
                 <DanmakuSidebar />
