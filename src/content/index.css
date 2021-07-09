@@ -103,6 +103,7 @@ input:checked + .slider:before {
 
 .danmaku-sendbar-iconButton {
     padding: 10px;
+    font-size: small;
 }
 
 .danmaku-sendbar-divider {
