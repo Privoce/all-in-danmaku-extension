@@ -93,6 +93,7 @@ input:checked + .slider:before {
     display: flex;
     align-items: center;
     width: 400px;
+    margin-top: 10px;
 }
 
 .danmaku-sendbar-input {

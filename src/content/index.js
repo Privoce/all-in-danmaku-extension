@@ -29,6 +29,7 @@ import ReplayIcon from "@material-ui/icons/Replay"
 import Paper from '@material-ui/core/Paper';
 import DirectionsIcon from '@material-ui/icons/Directions';
 import InputBase from '@material-ui/core/InputBase';
+import ArrowUpwardRoundedIcon from '@material-ui/icons/ArrowUpwardRounded';
 
 const YoutubePlayerState = {
     "UNSTARTED": -1,
@@ -349,15 +350,15 @@ class DanmakuSendBar extends React.Component {
                 </IconButton>
                 <InputBase
                     className="danmaku-sendbar-input"
-                    placeholder="Search Google Maps"
-                    inputProps={{ 'aria-label': 'search google maps' }}
+                    placeholder="Send a friendly danmaku"
+                    inputProps={{ 'aria-label': 'Send a friendly danmaku' }}
                 />
-                <IconButton type="submit" className="danmaku-sendbar-iconButton" aria-label="search">
-                    <SearchIcon />
-                </IconButton>
+                {/*<IconButton type="submit" className="danmaku-sendbar-iconButton" aria-label="search">*/}
+                {/*    <SearchIcon />*/}
+                {/*</IconButton>*/}
                 <Divider className="danmaku-sendbar-divider" orientation="vertical" />
-                <IconButton color="primary" className="danmaku-sendbar-iconButton" aria-label="directions">
-                    <DirectionsIcon />
+                <IconButton color="primary" className="danmaku-sendbar-iconButton" aria-label="arrowupward">
+                    <ArrowUpwardRoundedIcon />
                 </IconButton>
             </Paper>
         );
