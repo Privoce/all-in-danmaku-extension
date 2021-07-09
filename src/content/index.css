@@ -87,3 +87,24 @@ input:checked + .slider:before {
 .toolbar-right {
     flex: 1 1 auto;
 }
+
+.danmaku-sendbar-root {
+    padding: 2px 4px;
+    display: flex;
+    align-items: center;
+    width: 400px;
+}
+
+.danmaku-sendbar-input {
+    margin-left: 3px;
+    flex: 1;
+}
+
+.danmaku-sendbar-iconButton {
+    padding: 10px;
+}
+
+.danmaku-sendbar-divider {
+    height: 28px;
+    margin: 4px;
+}
