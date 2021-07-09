@@ -29,7 +29,7 @@ import ReplayIcon from "@material-ui/icons/Replay"
 import Paper from '@material-ui/core/Paper';
 import DirectionsIcon from '@material-ui/icons/Directions';
 import InputBase from '@material-ui/core/InputBase';
-import ArrowUpwardRoundedIcon from '@material-ui/icons/ArrowUpwardRounded';
+import ArrowUpwardRoundedIcon from '@material-ui/icons/ArrowUpward';
 
 const YoutubePlayerState = {
     "UNSTARTED": -1,
@@ -346,7 +346,7 @@ class DanmakuSendBar extends React.Component {
         return (
             <Paper component="form" className="danmaku-sendbar-root">
                 <IconButton className="danmaku-sendbar-iconButton" aria-label="menu">
-                    <MenuIcon />
+                    <MenuIcon fontsize={"small"}/>
                 </IconButton>
                 <InputBase
                     className="danmaku-sendbar-input"
@@ -358,7 +358,7 @@ class DanmakuSendBar extends React.Component {
                 {/*</IconButton>*/}
                 <Divider className="danmaku-sendbar-divider" orientation="vertical" />
                 <IconButton color="primary" className="danmaku-sendbar-iconButton" aria-label="arrowupward">
-                    <ArrowUpwardRoundedIcon />
+                    <ArrowUpwardRoundedIcon fontSize="small"/>
                 </IconButton>
             </Paper>
         );
