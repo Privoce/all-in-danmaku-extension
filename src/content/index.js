@@ -346,12 +346,12 @@ class DanmakuSendBar extends React.Component {
         return (
             <Paper component="form" className="danmaku-sendbar-root">
                 <IconButton className="danmaku-sendbar-iconButton" aria-label="menu">
-                    <MenuIcon fontsize={"small"}/>
+                    <MenuIcon fontsize="small"/>
                 </IconButton>
                 <InputBase
                     className="danmaku-sendbar-input"
                     placeholder="Send a friendly danmaku"
-                    inputProps={{ 'aria-label': 'Send a friendly danmaku' }}
+                    inputProps={{ 'aria-label': 'Send a friendly danmaku'}}
                 />
                 {/*<IconButton type="submit" className="danmaku-sendbar-iconButton" aria-label="search">*/}
                 {/*    <SearchIcon />*/}
