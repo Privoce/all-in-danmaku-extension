@@ -94,6 +94,7 @@ input:checked + .slider:before {
     align-items: center;
     width: 400px;
     margin-top: 10px;
+    font-size: small;
 }
 
 .danmaku-sendbar-input {
@@ -103,7 +104,6 @@ input:checked + .slider:before {
 
 .danmaku-sendbar-iconButton {
     padding: 10px;
-    font-size: small;
 }
 
 .danmaku-sendbar-divider {
