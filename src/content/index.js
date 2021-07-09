@@ -30,6 +30,10 @@ import Paper from '@material-ui/core/Paper';
 import DirectionsIcon from '@material-ui/icons/Directions';
 import InputBase from '@material-ui/core/InputBase';
 import ArrowUpwardRoundedIcon from '@material-ui/icons/ArrowUpward';
+import { EventEmitter } from "events";
+import * as target from "semver";
+
+let eventEmitter = new EventEmitter();
 
 const YoutubePlayerState = {
     "UNSTARTED": -1,
@@ -120,7 +124,6 @@ infoBar.insertBefore(toolBar, referenceBar)
 
 // ReactDOM.render(<PageSwitcher />, toolBar)
 
-const switcher = document.getElementById('all-in-danmaku-switcher')
 
 class DanmakuLayer extends React.Component {
     constructor(props) {
@@ -133,7 +136,8 @@ class DanmakuLayer extends React.Component {
             screen: null,
             // intervalID: null,
             width: '500px',
-            height: '300px'
+            height: '300px',
+            msg:null,
         }
         // this.tryGetDanmaku()
         // TODO: sendMessage to background, background start the actual request and store contents in localStorage,
@@ -142,6 +146,20 @@ class DanmakuLayer extends React.Component {
     }
 
     componentDidMount() {
+        const switcher = document.getElementById('all-in-danmaku-switcher')
+        // 声明一个自定义事件
+        this.eventEmitter = eventEmitter.addListener("sendMsg",(msg)=>{
+            this.setState({
+                msg:msg,
+            })
+            console.log("msg recieved: "+msg);
+            if(msg){
+                this.state.screen.push(<StyledBullet
+                    size="small"
+                    msg={msg}
+                />);
+            }
+        });
         /*const resizeObserver = new ResizeObserver(entries => {
             for (let entry of entries) {
                 if (entry.width) {
@@ -263,6 +281,10 @@ class DanmakuLayer extends React.Component {
         // })
     }
 
+    componentWillUnmount(){
+        eventEmitter.removeListener(this.eventEmitter);
+    }
+
     render() {
         return (
             <div className="screen" style={{ width: this.state.width, height: this.state.height, zIndex: 15 }}></div>
@@ -341,8 +363,24 @@ class DanmakuSidebar extends React.Component {
 class DanmakuSendBar extends React.Component {
     constructor(props) {
         super(props);
+        this.state={
+            msg:null,
+        }
+        this.handleChange = this.handleChange.bind(this);
     }
+
+    handleChange(event) {
+        this.setState({msg: event.target.value});
+    }
+
     render() {
+        const sendDanmaku = (msg) => {
+            return () => {
+                // 触发自定义事件
+                eventEmitter.emit("sendDanmaku",msg)
+                console.log("msg sent")
+            }
+        }
         return (
             <Paper component="form" className="danmaku-sendbar-root">
                 <IconButton className="danmaku-sendbar-iconButton" aria-label="menu">
@@ -352,12 +390,13 @@ class DanmakuSendBar extends React.Component {
                     className="danmaku-sendbar-input"
                     placeholder="Send a friendly danmaku"
                     inputProps={{ 'aria-label': 'Send a friendly danmaku'}}
+                    onChange={this.handleChange}
                 />
                 {/*<IconButton type="submit" className="danmaku-sendbar-iconButton" aria-label="search">*/}
                 {/*    <SearchIcon />*/}
                 {/*</IconButton>*/}
                 <Divider className="danmaku-sendbar-divider" orientation="vertical" />
-                <IconButton color="primary" className="danmaku-sendbar-iconButton" aria-label="arrowupward">
+                <IconButton color="primary" className="danmaku-sendbar-iconButton" aria-label="arrowupward" onClick={sendDanmaku(this.state.msg)}>
                     <ArrowUpwardRoundedIcon fontSize="small"/>
                 </IconButton>
             </Paper>
