@@ -538,6 +538,19 @@ Praesent commodo cursus magna, vel scelerisque nisl consectetur et.`
     }
 }
 
+class DanmakuSwitcher extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            checked: false
+        }
+    }
+
+    handleChange = (event) => {
+        this.setState({checked: event.target.checked})
+    }
+}
+
 function DanmakuToolBar(props) {
     return (
         <div className="danmaku-toolbar">
