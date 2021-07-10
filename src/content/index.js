@@ -548,6 +548,24 @@ class DanmakuSwitcher extends React.Component {
 
     handleChange = (event) => {
         this.setState({checked: event.target.checked})
+        if (event.target.checked) {
+            eventEmitter.emit('danmakuon')
+        } else {
+            eventEmitter.emit('danmakuoff')
+        }
+    }
+
+    render() {
+        return (
+            <FormControlLabel control={
+                <Switch
+                    checked={this.state.checked}
+                    onChange={this.handleChange}
+                    name="danmaku-switch"
+                    color="primary"
+                />
+            } label="Switch Danmaku" />
+        )
     }
 }
 
@@ -555,7 +573,7 @@ function DanmakuToolBar(props) {
     return (
         <div className="danmaku-toolbar">
             <div className="toolbar-left">
-                <PageSwitcher />
+                <DanmakuSwitcher />
             </div>
             <div className="toolbar-middle">
                 <DanmakuSendBar />
