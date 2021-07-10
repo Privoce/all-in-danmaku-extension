@@ -22,10 +22,14 @@ import Button from "@material-ui/core/Button"
 import IconButton from "@material-ui/core/IconButton"
 import Tabs from "@material-ui/core/Tabs"
 import Tab from "@material-ui/core/Tab"
+import {InputBase} from "@material-ui/core";
+import {Paper} from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu"
 import SearchIcon from "@material-ui/icons/Search"
 import ListIcon from "@material-ui/icons/List"
 import ReplayIcon from "@material-ui/icons/Replay"
+import EventEmitter from 'events'
+import * as target from 'semver'
 
 
 const YoutubePlayerState = {
@@ -116,8 +120,6 @@ toolBar.id = 'all-in-danmaku-toolbar'
 infoBar.insertBefore(toolBar, referenceBar)
 
 // ReactDOM.render(<PageSwitcher />, toolBar)
-
-const switcher = document.getElementById('all-in-danmaku-switcher')
 
 class DanmakuLayer extends React.Component {
     constructor(props) {
@@ -335,29 +337,133 @@ class DanmakuSidebar extends React.Component {
     }
 }
 
+class DanmakuSearchResultItem extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        return (
+                <div style={{display: "flex"}}>
+                    <img ref={this.props.href} />
+                    <div>
+                        <h3>{this.props.title}</h3>
+                        <div style={{display: "inline-block"}}>
+                            <div>{this.props.times}</div>
+                            <div>{this.props.date}</div>
+                        </div>
+                        <div style={{display: "inline-block"}}>
+                            <img ref={this.props.icon} />
+                            <div>{this.props.author}</div>
+                        </div>
+                    </div>
+                </div>
+            )
+
+    }
+}
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+        padding: '2px 4px',
+        display: 'flex',
+        alignItems: 'center',
+        width: '100%',
+        fontSize: 'medium'
+    },
+    input: {
+        marginLeft: theme.spacing(1),
+        flex: 1,
+    },
+    iconButton: {
+        padding: 10,
+    },
+    divider: {
+        height: 28,
+        margin: 4,
+    },
+}))
+
+function DanmakuSearchBar() {
+
+    const classes = useStyles()
+    return (
+        <div className={classes.root}>
+            <IconButton className={classes.iconButton}>
+                <MenuIcon />
+            </IconButton>
+            <InputBase
+                className={classes.input}
+                placeholder="Manually Search or Select bvID Directly!"
+                inputProps={{ 'aria-label': 'search matching video resource'}}
+            />
+            <Divider className={classes.divider} orientation="vertical" />
+            <IconButton type="submit" className={classes.iconButton} aria-label="search">
+                <SearchIcon />
+            </IconButton>
+        </div>
+    );
+}
+
 class DanmakuSearchDialog extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             open: false
         }
+        this.openDialog = this.openDialog.bind(this)
+        this.toggleDialog = this.toggleDialog.bind(this)
     }
 
-    toggleDialog(open) {
+    toggleDialog = () => {
+        this.setState({open: false})
+    }
 
+    openDialog() {
+        console.log('open dialog')
+        this.setState({open: true})
     }
 
     renderDialog() {
-
+        return (
+            <div>
+                Search Result Placeholder
+            </div>
+        )
     }
 
     render() {
         return (
             <div>
-                <IconButton onClick={this.toggleDialog(true)}>
+                <IconButton onClick={this.openDialog}>
                     <ReplayIcon />
                 </IconButton>
-                <Dialog open={this.state.open}>
+                <Dialog
+                    open={this.state.open}
+                    onClose={this.toggleDialog}
+                    scroll='paper'
+                    maxWidth='md'
+                    fullWidth={true}
+                >
+                    <DialogTitle>
+                        <DanmakuSearchBar />
+                    </DialogTitle>
+                    <DialogContent dividers={true}>
+
+                            {
+                                `Cras mattis consectetur purus sit amet fermentum.
+Cras justo odio, dapibus ac facilisis in, egestas eget quam.
+Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
+Praesent commodo cursus magna, vel scelerisque nisl consectetur et.`
+                            }
+
+                        {this.renderDialog()}
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.toggleDialog} color="primary">
+                            Cancel
+                        </Button>
+                    </DialogActions>
 
                 </Dialog>
             </div>
@@ -376,6 +482,7 @@ function DanmakuToolBar(props) {
 
             </div>
             <div className="toolbar-right">
+                <DanmakuSearchDialog />
                 <DanmakuSidebar />
             </div>
 
@@ -384,6 +491,7 @@ function DanmakuToolBar(props) {
 }
 
 ReactDOM.render(<DanmakuToolBar />, toolBar)
+const switcher = document.getElementById('all-in-danmaku-switcher')
 
 const parentVideoContainer = document.querySelector(".html5-video-container")
 const abstractLayer = document.createElement('div')
