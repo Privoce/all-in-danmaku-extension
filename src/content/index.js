@@ -471,50 +471,6 @@ class DanmakuSendBar extends React.Component {
     }
 }
 
-class DanmakuSendBar extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state={
-            msg:null,
-        }
-        this.handleChange = this.handleChange.bind(this);
-    }
-
-    handleChange(event) {
-        this.setState({msg: event.target.value});
-    }
-
-    render() {
-        const sendDanmaku = (msg) => {
-            return () => {
-                // 触发自定义事件
-                eventEmitter.emit("sendDanmaku",msg)
-                console.log("msg sent")
-            }
-        }
-        return (
-            <Paper component="form" className="danmaku-sendbar-root">
-                <IconButton className="danmaku-sendbar-iconButton" aria-label="menu">
-                    <MenuIcon fontsize="small"/>
-                </IconButton>
-                <InputBase
-                    className="danmaku-sendbar-input"
-                    placeholder="Send a friendly danmaku"
-                    inputProps={{ 'aria-label': 'Send a friendly danmaku'}}
-                    onChange={this.handleChange}
-                />
-                {/*<IconButton type="submit" className="danmaku-sendbar-iconButton" aria-label="search">*/}
-                {/*    <SearchIcon />*/}
-                {/*</IconButton>*/}
-                <Divider className="danmaku-sendbar-divider" orientation="vertical" />
-                <IconButton color="primary" className="danmaku-sendbar-iconButton" aria-label="arrowupward" onClick={sendDanmaku(this.state.msg)}>
-                    <ArrowUpwardRoundedIcon fontSize="small"/>
-                </IconButton>
-            </Paper>
-        );
-    }
-}
-
 class DanmakuSearchDialog extends React.Component {
     constructor(props) {
         super(props);
