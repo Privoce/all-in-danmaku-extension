@@ -159,6 +159,14 @@ class DanmakuLayer extends React.Component {
                 />);
             }
         });
+        this.danmakuOnHandler = eventEmitter.addListener('danmakuon', () => {
+            if (globalDanmakuFetched) {
+                this.state.screen.show()
+            }
+        })
+        this.danmakuOffHandler = eventEmitter.addListener('danmakuoff', () => {
+            this.state.screen.hide()
+        })
         /*const resizeObserver = new ResizeObserver(entries => {
             for (let entry of entries) {
                 if (entry.width) {
@@ -170,7 +178,7 @@ class DanmakuLayer extends React.Component {
             }
         })
         resizeObserver.observe(VT)*/
-        switcher.addEventListener('change', (event) => {
+        /*switcher.addEventListener('change', (event) => {
             if (event.currentTarget.checked) {
                 if (globalDanmakuFetched === 0) {
                     this.tryGetDanmaku()
@@ -184,7 +192,7 @@ class DanmakuLayer extends React.Component {
                     this.state.screen.hide()
                 }
             }
-        })
+        })*/
         VT.onpause = () => {
             console.log('pause')
             if (this.state.screen) {
@@ -407,8 +415,21 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 function DanmakuSearchBar() {
-
     const classes = useStyles()
+    const [msg, setMsg] = useState(null)
+
+    const searchHandler = (value) => {
+        if (value.indexOf('/BV') !== -1) {
+            const bvID = value.slice(1)
+            eventEmitter.emit('directBV', bvID)
+        } else {
+            //search request (value)
+        }
+    }
+    const changeHandler = (event) => {
+        setMsg(event.target.value)
+    }
+
     return (
         <div className={classes.root}>
             <IconButton className={classes.iconButton}>
@@ -420,7 +441,7 @@ function DanmakuSearchBar() {
                 inputProps={{ 'aria-label': 'search matching video resource'}}
             />
             <Divider className={classes.divider} orientation="vertical" />
-            <IconButton type="submit" className={classes.iconButton} aria-label="search">
+            <IconButton onClick={searchHandler} className={classes.iconButton} aria-label="search">
                 <SearchIcon />
             </IconButton>
         </div>
@@ -488,6 +509,14 @@ class DanmakuSearchDialog extends React.Component {
     openDialog() {
         console.log('open dialog')
         this.setState({open: true})
+    }
+
+    componentDidMount() {
+        this.eventEmitter = eventEmitter.addListener('danmakuon', () => {
+            if (!globalDanmakuFetched) {
+                this.setState({open: true})
+            }
+        })
     }
 
     renderDialog() {
