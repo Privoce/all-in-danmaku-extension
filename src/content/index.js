@@ -293,7 +293,7 @@ class DanmakuLayer extends React.Component {
 
 const sidebarStyle = makeStyles({
     list: {
-        width: 400
+        width: 500
     }
 })
 
