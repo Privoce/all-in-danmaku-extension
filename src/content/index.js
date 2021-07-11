@@ -294,12 +294,6 @@ class DanmakuLayer extends React.Component {
     }
 }
 
-const sidebarStyle = makeStyles({
-    list: {
-        width: 500
-    }
-})
-
 class DanmakuSidebar extends React.Component {
     constructor(props) {
         super(props);
@@ -309,6 +303,18 @@ class DanmakuSidebar extends React.Component {
             display: false,
             danmakuList:null,
         }
+    }
+
+    componentDidMount(){
+        this.eventEmitter = eventEmitter.addListener("getDanmakuList",(BVid)=>{
+            chrome.storage.local.get([BVid],(result)=>{
+                this.setState({danmakuList:result.danmakuData})
+            })
+        });
+    }
+
+    componentWillUnmount(){
+        eventEmitter.removeListener(this.eventEmitter);
     }
 
     toggleSidebar(open) {
@@ -324,7 +330,7 @@ class DanmakuSidebar extends React.Component {
 
     renderList() {
         const renderRow = ({ index, style }) => (
-            <div style={style}>Row {index}</div>
+            <div style={style}>{this.state.danmakuList[index].content}</div>
         );
         return (
             <div
