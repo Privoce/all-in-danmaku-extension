@@ -32,6 +32,9 @@ import InputBase from '@material-ui/core/InputBase';
 import ArrowUpwardRoundedIcon from '@material-ui/icons/ArrowUpward';
 import { EventEmitter } from "events";
 import * as target from "semver";
+import { FixedSizeList } from 'react-window';
+import AutoSizer from "react-virtualized-auto-sizer";
+
 
 let eventEmitter = new EventEmitter();
 
@@ -147,7 +150,7 @@ class DanmakuLayer extends React.Component {
     componentDidMount() {
         const switcher = document.getElementById('all-in-danmaku-switcher')
         // 声明一个自定义事件
-        this.eventEmitter = eventEmitter.addListener("sendMsg",(msg)=>{
+        this.eventEmitter = eventEmitter.addListener("sendDanmaku",(msg)=>{
             this.setState({
                 msg:msg,
             })
@@ -291,12 +294,6 @@ class DanmakuLayer extends React.Component {
     }
 }
 
-const sidebarStyle = makeStyles({
-    list: {
-        width: 500
-    }
-})
-
 class DanmakuSidebar extends React.Component {
     constructor(props) {
         super(props);
@@ -304,7 +301,20 @@ class DanmakuSidebar extends React.Component {
         this.state = {
             videoName: props.value,
             display: false,
+            danmakuList:null,
         }
+    }
+
+    componentDidMount(){
+        this.eventEmitter = eventEmitter.addListener("getDanmakuList",(BVid)=>{
+            chrome.storage.local.get([BVid],(result)=>{
+                this.setState({danmakuList:result.danmakuData})
+            })
+        });
+    }
+
+    componentWillUnmount(){
+        eventEmitter.removeListener(this.eventEmitter);
     }
 
     toggleSidebar(open) {
@@ -319,6 +329,9 @@ class DanmakuSidebar extends React.Component {
     }
 
     renderList() {
+        const renderRow = ({ index, style }) => (
+            <div style={style}>{this.state.danmakuList[index].content}</div>
+        );
         return (
             <div
                 className="danmaku-sidebar"
@@ -333,11 +346,19 @@ class DanmakuSidebar extends React.Component {
                 >
                     <Tab label="Danmaku List" />
                 </Tabs>
-                <List dense={true}>
-                    <ListItem disabled={true}>
-                        <ListItemText primary="Content" />
-                    </ListItem>
-                </List>
+                <AutoSizer>
+                    {({ height, width }) => (
+                        <FixedSizeList
+                            className="danmakulist"
+                            height={height-96}
+                            itemCount={1000}
+                            itemSize={35}
+                            width={width}
+                        >
+                            {renderRow}
+                        </FixedSizeList>
+                    )}
+                </AutoSizer>
             </div>
         )
     }
@@ -349,7 +370,7 @@ class DanmakuSidebar extends React.Component {
                         <IconButton onClick={this.toggleSidebar(true)} style={{padding: 10}}>
                             <ListIcon />
                         </IconButton>
-                        <Drawer anchor={'right'} open={this.state.display} onClose={this.toggleSidebar(false)}>
+                        <Drawer anchor={'right'} open={this.state.display} onClose={this.toggleSidebar(false)} className="sidedrawer">
                             {this.renderList()}
                         </Drawer>
                     </React.Fragment>
@@ -445,7 +466,6 @@ class DanmakuSendBar extends React.Component {
             return () => {
                 // 触发自定义事件
                 eventEmitter.emit("sendDanmaku",msg)
-                console.log("msg sent")
             }
         }
         return (
