@@ -71,6 +71,7 @@ input:checked + .slider:before {
 
 .danmaku-sidebar {
     width: 400px;
+    height: 100%;
 }
 
 .danmaku-toolbar {
