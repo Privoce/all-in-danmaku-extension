@@ -19,7 +19,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
     }).then((response) => {
         // console.log(response)
-        chrome.storage.local.set({danmakuData: response.elems}, () => {
+        chrome.storage.local.set({[message]: response.elems}, () => {
             console.log("danmaku fetched")
             sendResponse({farewell: 'success'})
             console.log('responded')
