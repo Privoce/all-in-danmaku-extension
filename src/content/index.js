@@ -170,6 +170,11 @@ class DanmakuLayer extends React.Component {
         this.danmakuOffHandler = eventEmitter.addListener('danmakuoff', () => {
             this.state.screen.hide()
         })
+        this.directBVHandler = eventEmitter.addListener('directBV', (bvid) => {
+            // this.state.bvId = bvid
+            this.setState({danmakuList: null})
+            this.tryGetDanmaku(bvid, 1)
+        })
         /*const resizeObserver = new ResizeObserver(entries => {
             for (let entry of entries) {
                 if (entry.width) {
@@ -255,18 +260,21 @@ class DanmakuLayer extends React.Component {
 
     }
 
-    tryGetDanmaku() {
+    tryGetDanmaku(bvid, segmentIndex) {
         // this.state.bvId = 'BV1F54y1G7mi'
         //TODO: do some search
-        let newBVId = prompt("Please Enter BV ID: ")
-        this.state.bvId = newBVId
-        let appID = chrome.runtime.id
-        chrome.runtime.sendMessage(this.state.bvId + '_1', (response) => {
+        // let newBVId = prompt("Please Enter BV ID: ")
+        // this.state.bvId = newBVId
+        chrome.runtime.sendMessage(bvid + '_' + segmentIndex.toString(), (response) => {
             if (response.farewell === 'success') {
-                chrome.storage.local.get(['danmakuData'], (result) => {
-                    this.setState({danmakuList: result.danmakuData})
-                    if (Array.isArray(this.state.danmakuList)) {
-                        this.state.danmakuList.sort((a, b) => {
+                chrome.storage.local.get([bvid], (result) => {
+                    // this.setState({danmakuList: result.danmakuData})
+                    let newComingArray = result.danmakuData
+                    if (Array.isArray(newComingArray)) {
+                        if (Array.isArray(this.state.danmakuList)) {
+                            newComingArray = this.state.danmakuList + newComingArray
+                        }
+                        newComingArray.sort((a, b) => {
                             if (a.progress < b.progress) {
                                 return -1;
                             } else if (a.progress > b.progress) {
@@ -274,14 +282,19 @@ class DanmakuLayer extends React.Component {
                             }
                             return 0;
                         })
-                        this.state.screen = new BulletScreen(document.querySelector('.screen'), {duration: 6})
+                        chrome.storage.local.set({[bvid]: newComingArray})
+                        this.setState({danmakuList: newComingArray})
+                        this.setState({screen: new BulletScreen(document.querySelector('.screen'), {duration: 8})})
                         // this.state.screen.push(<StyledBullet msg={this.state.danmakuList[0].content} />)
+                    } else {
+                        chrome.storage.local.set({[bvid]: this.state.danmakuList})
                     }
                     console.log('success')
                     console.log(this.state.danmakuList)
                     console.log(Array.isArray(this.state.danmakuList))
                     globalDanmakuFetched = 1
                 })
+                eventEmitter.emit('danmakuFetched', bvid)
             }
         })
         // fetchDanmaku(this.state.bvId).then(({data, status}) => {
@@ -293,6 +306,9 @@ class DanmakuLayer extends React.Component {
 
     componentWillUnmount(){
         eventEmitter.removeListener(this.eventEmitter);
+        eventEmitter.removeListener(this.danmakuOnHandler)
+        eventEmitter.removeListener(this.danmakuOffHandler)
+        eventEmitter.removeListener(this.directBVHandler)
     }
 
     render() {
@@ -404,8 +420,8 @@ class DanmakuSearchResultItem extends React.Component {
                             <div>{this.props.date}</div>
                         </div>
                         <div style={{display: "inline-block"}}>
-                            <img ref={this.props.icon} />
                             <div>{this.props.author}</div>
+                            <div>{this.props.duration}</div>
                         </div>
                     </div>
                 </div>
@@ -444,7 +460,9 @@ function DanmakuSearchBar() {
             const bvID = value.slice(1)
             eventEmitter.emit('directBV', bvID)
         } else {
-            //search request (value)
+            chrome.runtime.sendMessage('s' + value, (response) => {
+                eventEmitter.emit('searchBarResult', response)
+            })
         }
     }
     const changeHandler = (event) => {
@@ -516,7 +534,8 @@ class DanmakuSearchDialog extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            open: false
+            open: false,
+            searchResult: null
         }
         this.openDialog = this.openDialog.bind(this)
         this.toggleDialog = this.toggleDialog.bind(this)
@@ -537,12 +556,23 @@ class DanmakuSearchDialog extends React.Component {
                 this.setState({open: true})
             }
         })
+        this.searchBarHandler = eventEmitter.addListener('searchBarResult', (msg) => {
+            this.setState({searchResult: msg})
+        })
     }
 
     renderDialog() {
         return (
             <div>
-                Search Result Placeholder
+                {this.state.searchResult.map((resultItem) =>
+                    <DanmakuSearchResultItem
+                        href={resultItem.pic}
+                        title={resultItem.title}
+                        times={resultItem.play}
+                        date={resultItem.pubdate}
+                        duration={resultItem.duration}
+                    />
+                )}
             </div>
         )
     }
