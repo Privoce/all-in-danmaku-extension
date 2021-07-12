@@ -261,7 +261,7 @@ class DanmakuLayer extends React.Component {
         let newBVId = prompt("Please Enter BV ID: ")
         this.state.bvId = newBVId
         let appID = chrome.runtime.id
-        chrome.runtime.sendMessage(this.state.bvId, (response) => {
+        chrome.runtime.sendMessage(this.state.bvId + '_1', (response) => {
             if (response.farewell === 'success') {
                 chrome.storage.local.get(['danmakuData'], (result) => {
                     this.setState({danmakuList: result.danmakuData})

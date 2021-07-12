@@ -3,29 +3,61 @@ import {fetchDanmaku} from "@/api/danmaku"
 import axios from "axios";
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log('bvID received.')
-    let url = 'http://ec2-18-163-238-71.ap-east-1.compute.amazonaws.com' + '?bvid=' + message
-    console.log(url)
-    let myRequest = new Request(url, {
-        method: 'GET',
-    })
-    // console.log(myRequest)
-    fetch(myRequest).then((response) => {
-        console.log(response)
-        if (response.ok) {
-            return response.json()
-        } else {
-            return ""
-        }
-    }).then((response) => {
-        // console.log(response)
-        chrome.storage.local.set({[message]: response.elems}, () => {
-            console.log("danmaku fetched")
-            sendResponse({farewell: 'success'})
-            console.log('responded')
+    console.log('request received.')
+    if (message.slice(0, 2) === 'BV') {
+        let danmakuRequest = message.split('_')
+        let url = 'http://ec2-18-163-238-71.ap-east-1.compute.amazonaws.com'
+            + '?bvid=' + danmakuRequest[0]
+            + '&segment=' + danmakuRequest[1]
+        console.log(url)
+        let myRequest = new Request(url, {
+            method: 'GET',
         })
-    })
-    return true
+        // console.log(myRequest)
+        fetch(myRequest).then((response) => {
+            console.log(response)
+            if (response.ok) {
+                return response.json()
+            } else {
+                return ""
+            }
+        }).then((response) => {
+            // console.log(response)
+            chrome.storage.local.set({[message]: response.elems}, () => {
+                console.log("danmaku fetched")
+                sendResponse({farewell: 'success'})
+                console.log('responded')
+            })
+        })
+        return true
+    } else if (message.slice(0, 1) === 's') {
+        let keyword = message.slice(1)
+        let url = 'http://ec2-18-163-238-71.ap-east-1.compute.amazonaws.com' + '?search=' + keyword
+        console.log(url)
+        let myRequest = new Request(url, {
+            method: 'GET',
+        })
+        // console.log(myRequest)
+        fetch(myRequest).then((response) => {
+            console.log(response)
+            if (response.ok) {
+                return response.json()
+            } else {
+                return ""
+            }
+        }).then((response) => {
+            sendResponse({
+                farewell: 'success',
+                result: response.data.result[8].data
+            })
+        })
+        return true
+
+    } else {
+        sendResponse({farewell: 'invalid'})
+        return true
+    }
+
     /*fetchDanmaku(message).then(({data, status}) => {
         chrome.storage.local.set({danmakuData: data}, () => {
             console.log('data fetched successfully')
