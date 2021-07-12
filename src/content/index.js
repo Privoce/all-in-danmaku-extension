@@ -82,6 +82,17 @@ chrome.storage.local.get(['videoname'], (result) => {
     console.log('Value currently is ' + result.videoname);
 });
 
+const switcher = document.getElementById('all-in-danmaku-switcher')
+
+const parentVideoContainer = document.querySelector(".html5-video-container")
+const abstractLayer = document.createElement('div')
+abstractLayer.id = 'danmaku-abstract-layer'
+abstractLayer.className = 'extension-top-layer'
+parentVideoContainer.appendChild(abstractLayer)
+
+const videoTitle = document.getElementsByName('title')
+const currentVideoName = videoTitle.innerHTML
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message === 'success') {
         chrome.storage.local.get(['danmakuData'], (result) => {
@@ -551,6 +562,9 @@ class DanmakuSearchDialog extends React.Component {
     }
 
     componentDidMount() {
+        chrome.runtime.sendMessage('s' + currentVideoName, (response) => {
+            this.setState({searchResult: response})
+        })
         this.eventEmitter = eventEmitter.addListener('danmakuon', () => {
             if (!globalDanmakuFetched) {
                 this.setState({open: true})
@@ -667,16 +681,6 @@ function DanmakuToolBar(props) {
 }
 
 ReactDOM.render(<DanmakuToolBar />, toolBar)
-const switcher = document.getElementById('all-in-danmaku-switcher')
-
-const parentVideoContainer = document.querySelector(".html5-video-container")
-const abstractLayer = document.createElement('div')
-abstractLayer.id = 'danmaku-abstract-layer'
-abstractLayer.className = 'extension-top-layer'
-parentVideoContainer.appendChild(abstractLayer)
-
-const videoTitle = document.getElementsByName('title')
-const currentVideoName = videoTitle.innerHTML
 
 // let instanceLayer = 0;
 ReactDOM.render(<DanmakuLayer value={currentVideoName}/>, abstractLayer);
