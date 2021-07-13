@@ -321,8 +321,8 @@ class DanmakuLayer extends React.Component {
                     console.log('push')
                     while (playBackIndex < newIndex) {
                         this.state.screen.push(
-                            <StyledBullet
-                                size="small"
+                            <StyledDanmaku
+                                size="normal"
                                 msg={this.state.danmakuList[playBackIndex].content}
                             />
                         );
@@ -343,7 +343,7 @@ class DanmakuLayer extends React.Component {
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevState.width !== this.state.width || prevState.height !== this.state.height) {
-            const s = new BulletScreen(document.querySelector('.screen'), {duration: 6})
+            const s = new BulletScreen(document.querySelector('.screen'), {duration: 6, trackHeight: 40})
             this.setState({screen: s})
         }
     }
@@ -384,7 +384,7 @@ class DanmakuLayer extends React.Component {
                         })
                         chrome.storage.local.set({[bvid]: newComingArray})
                         this.setState({danmakuList: newComingArray})
-                        this.setState({screen: new BulletScreen(document.querySelector('.screen'), {duration: 6})})
+                        this.setState({screen: new BulletScreen(document.querySelector('.screen'), {duration: 6, trackHeight: 40})})
                         // this.state.screen.push(<StyledBullet msg={this.state.danmakuList[0].content} />)
                     } else {
                         chrome.storage.local.set({[bvid]: this.state.danmakuList})
