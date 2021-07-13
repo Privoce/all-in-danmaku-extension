@@ -117,6 +117,13 @@ function playTimesConverter(times) {
         return times/10000 + 'w'
     }
 }
+function durationSegmentConverter(duration) {
+    let timeArray = duration.split(':')
+    let minute = parseInt(timeArray[0])
+    let second = parseInt(timeArray[0])
+    if (isNaN(minute) || isNaN(second)) { return 1; }
+    return Math.ceil(minute / 6)
+}
 
 function Danmaku(props) {
     const divStyle = {
@@ -156,7 +163,8 @@ class DanmakuLayer extends React.Component {
         super(props);
         this.state = {
             // videoName: props.value,
-            bvId: null,
+            blocks: 0,
+            bvid: null,
             danmakuList: null,
             // timeStamp: 0,
             screen: null,
@@ -165,6 +173,7 @@ class DanmakuLayer extends React.Component {
             height: '300px',
             msg:null,
         }
+        this.fetchedBlocks = 0
         // this.tryGetDanmaku()
         // TODO: sendMessage to background, background start the actual request and store contents in localStorage,
         //  then tab.sendMessage to content script. When caught tab message with current bvID, fetching danmaku contents
@@ -194,10 +203,17 @@ class DanmakuLayer extends React.Component {
         this.danmakuOffHandler = eventEmitter.addListener('danmakuoff', () => {
             this.state.screen.hide()
         })
-        this.directBVHandler = eventEmitter.addListener('directBV', (bvid) => {
+        this.directBVHandler = eventEmitter.addListener('directBV', (bvid, blocks) => {
             // this.state.bvId = bvid
-            this.setState({danmakuList: null})
+            this.setState({
+                bvid: bvid,
+                danmakuList: null,
+                blocks: blocks,
+            })
             this.tryGetDanmaku(bvid, 1)
+        })
+        this.multiSegmentsHandler = eventEmitter.addListener('continueFetch', (segmentIndex) => {
+            this.tryGetDanmaku(this.state.bvid, segmentIndex)
         })
         /*const resizeObserver = new ResizeObserver(entries => {
             for (let entry of entries) {
@@ -244,6 +260,13 @@ class DanmakuLayer extends React.Component {
                 const newIndex = this.state.danmakuList.findIndex((element) =>
                     element.progress > Math.floor(VT.currentTime * 1000)
                 )
+                if (VT.currentTime > 350 && this.fetchedBlocks < this.state.blocks) {
+                    console.log('start multi segments fetching')
+                    for (let i = this.fetchedBlocks + 1; i <= this.state.blocks; i++) {
+                        eventEmitter.emit('continueFetch', i)
+                    }
+                    this.fetchedBlocks = this.state.blocks
+                }
                 if (newIndex === -1) return;
                 if (this.state.danmakuList[newIndex].progress - this.state.danmakuList[playBackIndex].progress > 10000
                     || newIndex < playBackIndex) { // 10s
@@ -298,8 +321,12 @@ class DanmakuLayer extends React.Component {
                     let newComingArray = result[bvid]
                     if (Array.isArray(newComingArray)) {
                         if (Array.isArray(this.state.danmakuList)) {
-                            newComingArray = this.state.danmakuList + newComingArray
+                            console.log('merge')
+                            newComingArray = newComingArray.concat(this.state.danmakuList)
+
                         }
+                        console.log(newComingArray)
+
                         newComingArray.sort((a, b) => {
                             if (a.progress < b.progress) {
                                 return -1;
@@ -321,6 +348,7 @@ class DanmakuLayer extends React.Component {
                     globalDanmakuFetched = 1
                 })
                 eventEmitter.emit('danmakuFetched', bvid)
+                // this.fetchedBlocks = segmentIndex
             }
         })
         // fetchDanmaku(this.state.bvId).then(({data, status}) => {
@@ -437,7 +465,7 @@ class DanmakuSearchResultItem extends React.Component {
     }
 
     selectHandler(event) {
-        eventEmitter.emit('directBV', this.props.bvid)
+        eventEmitter.emit('directBV', this.props.bvid, durationSegmentConverter(this.props.duration))
         eventEmitter.emit('toggleDialogOff')
     }
 
@@ -490,11 +518,15 @@ function DanmakuSearchBar() {
         const value = msg
         if (value.indexOf('/BV') !== -1) {
             const bvID = value.slice(1)
-            eventEmitter.emit('directBV', bvID)
+            eventEmitter.emit('directBV', bvID, 30)
             eventEmitter.emit('toggleDialogOff')
         } else {
             chrome.runtime.sendMessage('s' + value, (response) => {
-                eventEmitter.emit('searchBarResult', response)
+                console.log(response)
+                if (response.farewell === 'success') {
+                    eventEmitter.emit('searchBarResult', response.result)
+                }
+
             })
         }
     }
@@ -596,6 +628,7 @@ class DanmakuSearchDialog extends React.Component {
             }
         })
         this.searchBarHandler = eventEmitter.addListener('searchBarResult', (msg) => {
+            console.log(msg)
             this.setState({searchResult: msg})
         })
         this.toggleDialogOffHandler = eventEmitter.addListener('toggleDialogOff', () => {
