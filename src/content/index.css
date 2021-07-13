@@ -114,3 +114,11 @@ input:checked + .slider:before {
     height: 28px;
     margin: 4px;
 }
+
+.keyword {
+    color: #f25d8e;
+}
+
+.danmaku-list-item:hover {
+    background-color: #bfbfbf;
+}

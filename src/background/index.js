@@ -4,6 +4,7 @@ import axios from "axios";
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log('request received.')
+    console.log(message)
     if (message.slice(0, 2) === 'BV') {
         let danmakuRequest = message.split('_')
         let url = 'http://ec2-18-163-238-71.ap-east-1.compute.amazonaws.com'
@@ -23,7 +24,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             }
         }).then((response) => {
             // console.log(response)
-            chrome.storage.local.set({[message]: response.elems}, () => {
+            chrome.storage.local.set({[danmakuRequest[0]]: response.elems}, () => {
                 console.log("danmaku fetched")
                 sendResponse({farewell: 'success'})
                 console.log('responded')
@@ -46,6 +47,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 return ""
             }
         }).then((response) => {
+            console.log(response)
             sendResponse({
                 farewell: 'success',
                 result: response.data.result[8].data
