@@ -260,7 +260,7 @@ class DanmakuLayer extends React.Component {
                 const newIndex = this.state.danmakuList.findIndex((element) =>
                     element.progress > Math.floor(VT.currentTime * 1000)
                 )
-                if (VT.currentTime * 1000 > 350 && this.fetchedBlocks < this.state.blocks) {
+                if (VT.currentTime > 350 && this.fetchedBlocks < this.state.blocks) {
                     console.log('start multi segments fetching')
                     for (let i = this.fetchedBlocks + 1; i <= this.state.blocks; i++) {
                         eventEmitter.emit('continueFetch', i)
@@ -321,8 +321,12 @@ class DanmakuLayer extends React.Component {
                     let newComingArray = result[bvid]
                     if (Array.isArray(newComingArray)) {
                         if (Array.isArray(this.state.danmakuList)) {
-                            newComingArray = this.state.danmakuList + newComingArray
+                            console.log('merge')
+                            newComingArray = newComingArray.concat(this.state.danmakuList)
+
                         }
+                        console.log(newComingArray)
+
                         newComingArray.sort((a, b) => {
                             if (a.progress < b.progress) {
                                 return -1;
@@ -518,7 +522,11 @@ function DanmakuSearchBar() {
             eventEmitter.emit('toggleDialogOff')
         } else {
             chrome.runtime.sendMessage('s' + value, (response) => {
-                eventEmitter.emit('searchBarResult', response)
+                console.log(response)
+                if (response.farewell === 'success') {
+                    eventEmitter.emit('searchBarResult', response.result)
+                }
+
             })
         }
     }
@@ -620,6 +628,7 @@ class DanmakuSearchDialog extends React.Component {
             }
         })
         this.searchBarHandler = eventEmitter.addListener('searchBarResult', (msg) => {
+            console.log(msg)
             this.setState({searchResult: msg})
         })
         this.toggleDialogOffHandler = eventEmitter.addListener('toggleDialogOff', () => {
