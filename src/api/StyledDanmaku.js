@@ -5,11 +5,12 @@ const MsgStyle = {
     fontWeight: '800',
     lineHeight: '1.4',
     opacity:'1',
-    color: '#FFFFFF'
+    color: '#FFFFFF',
+    textShadow: '1px 1px #000000, 1px -1px #000000, -1px -1px #000000, -1px 1px #000000',
 };
 const sizes = {
-    small: '15px',
-    normal: '24px',
+    small: '18px',
+    normal: '25px',
     large: '14px',
     huge: '16px'
 };

@@ -115,6 +115,8 @@ abstractLayer.id = 'danmaku-abstract-layer'
 abstractLayer.className = 'extension-top-layer'
 parentVideoContainer.appendChild(abstractLayer)
 
+let sizeReferenceContainer = document.querySelector(".html5-video-player")
+
 let videoTitle = document.querySelector('meta[name~="title"]')
 let currentVideoName = videoTitle && videoTitle.getAttribute("content")
 
@@ -248,17 +250,22 @@ class DanmakuLayer extends React.Component {
                 msg:null,
             })
         })
-        /*const resizeObserver = new ResizeObserver(entries => {
+        const resizeObserver = new ResizeObserver(entries => {
+            console.log('modified')
             for (let entry of entries) {
-                if (entry.width) {
-                    this.state.width = entry.width.toString() + 'px'
-                }
-                if (entry.height) {
-                    this.state.height = entry.height.toString() + 'px'
+                console.log(entry.target.clientWidth)
+                if (entry.target.clientWidth) {
+                    console.log('modified width')
+                    this.setState({
+                        width: entry.target.clientWidth.toString() + 'px',
+                        height: entry.target.clientHeight.toString() + 'px',
+                    })
                 }
             }
         })
-        resizeObserver.observe(VT)*/
+        resizeObserver.observe(sizeReferenceContainer)
+        console.log(sizeReferenceContainer.clientWidth)
+        console.log(sizeReferenceContainer.width)
         /*switcher.addEventListener('change', (event) => {
             if (event.currentTarget.checked) {
                 if (globalDanmakuFetched === 0) {
@@ -292,7 +299,7 @@ class DanmakuLayer extends React.Component {
             if (Array.isArray(this.state.danmakuList) && this.state.screen) {
                 // console.log(this.state.danmakuList)
                 const newIndex = this.state.danmakuList.findIndex((element) => {
-                    console.log(element)
+                    //console.log(element)
                     return element.progress > Math.floor(VT.currentTime * 1000)}
 
                 )
@@ -314,8 +321,8 @@ class DanmakuLayer extends React.Component {
                     console.log('push')
                     while (playBackIndex < newIndex) {
                         this.state.screen.push(
-                            <StyledBullet
-                                size="small"
+                            <StyledDanmaku
+                                size="normal"
                                 msg={this.state.danmakuList[playBackIndex].content}
                             />
                         );
@@ -334,10 +341,12 @@ class DanmakuLayer extends React.Component {
         }
     }
 
-    /*componentDidUpdate(prevProps, prevState, snapshot) {
-        const s = new BulletScreen(document.querySelector('.screen'), {duration: 6})
-        this.setState({screen: s})
-    }*/
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevState.width !== this.state.width || prevState.height !== this.state.height) {
+            const s = new BulletScreen(document.querySelector('.screen'), {duration: 6, trackHeight: 40})
+            this.setState({screen: s})
+        }
+    }
 
     onSwitchClicked() {
 
@@ -375,7 +384,7 @@ class DanmakuLayer extends React.Component {
                         })
                         chrome.storage.local.set({[bvid]: newComingArray})
                         this.setState({danmakuList: newComingArray})
-                        this.setState({screen: new BulletScreen(document.querySelector('.screen'), {duration: 8})})
+                        this.setState({screen: new BulletScreen(document.querySelector('.screen'), {duration: 6, trackHeight: 40})})
                         // this.state.screen.push(<StyledBullet msg={this.state.danmakuList[0].content} />)
                     } else {
                         chrome.storage.local.set({[bvid]: this.state.danmakuList})
@@ -525,6 +534,7 @@ class DanmakuSearchResultItem extends React.Component {
                     </div>*/
                 <ListItem alignItems="flex-start" onClick={this.selectHandler} button>
                     <ListItemText
+                        style={{fontSize: "normal"}}
                         primary={<h3 dangerouslySetInnerHTML={{__html: this.props.title}}/>}
                         secondary={
                             <React.Fragment>
@@ -534,16 +544,18 @@ class DanmakuSearchResultItem extends React.Component {
                                     style={{display: "inline"}}
                                     color="textPrimary"
                                 >
-                                    {this.props.author + " "}
+                                    {this.props.author}
                                 </Typography>
-                                <div style={{alignItems: "center", display: "inline-block", margin: "auto", textAlign: "center"}}>
-                                    <TimerIcon />
-                                    { this.props.duration + " "}
-                                    <PlayCircleOutlineIcon />
-                                    { playTimesConverter(this.props.times) + " "}
-                                    <TodayIcon />
-                                    { unixTimeConverter(this.props.date)}
-                                </div>
+
+                                <Typography style={{display: "flex", alignItems: "center"}}>
+                                    <TimerIcon fontSize="small"/>
+                                    <span className="search-result-text-span">{this.props.duration + " "}</span>
+                                    <PlayCircleOutlineIcon fontSize="small"/>
+                                    <span className="search-result-text-span">{ playTimesConverter(this.props.times) + " "}</span>
+                                    <TodayIcon fontSize="small"/>
+                                    <span className="search-result-text-span">{ unixTimeConverter(this.props.date)}</span>
+                                </Typography>
+
                             </React.Fragment>
                         }
                     />
