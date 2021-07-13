@@ -90,8 +90,8 @@ abstractLayer.id = 'danmaku-abstract-layer'
 abstractLayer.className = 'extension-top-layer'
 parentVideoContainer.appendChild(abstractLayer)
 
-const videoTitle = document.getElementsByName('title')
-const currentVideoName = videoTitle.innerHTML
+const videoTitle = document.querySelector('meta[name~="title"]')
+const currentVideoName = videoTitle && videoTitle.getAttribute("content")
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message === 'success') {
@@ -104,6 +104,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 })
 
+function unixTimeConverter(timeStamp) {
+    let date = new Date(timeStamp * 1000)
+    return date.getFullYear().toString()
+        + '-' + (date.getMonth() + 1).toString().padStart(2, '0')
+        + '-' + date.getDate().toString().padStart(2, '0')
+}
+function playTimesConverter(times) {
+    if (times < 10000) {
+        return times
+    } else {
+        return times/10000 + 'w'
+    }
+}
 
 function Danmaku(props) {
     const divStyle = {
@@ -280,7 +293,9 @@ class DanmakuLayer extends React.Component {
             if (response.farewell === 'success') {
                 chrome.storage.local.get([bvid], (result) => {
                     // this.setState({danmakuList: result.danmakuData})
-                    let newComingArray = result.danmakuData
+                    console.log(result)
+                    console.log(result[bvid])
+                    let newComingArray = result[bvid]
                     if (Array.isArray(newComingArray)) {
                         if (Array.isArray(this.state.danmakuList)) {
                             newComingArray = this.state.danmakuList + newComingArray
@@ -418,24 +433,29 @@ class DanmakuSidebar extends React.Component {
 class DanmakuSearchResultItem extends React.Component {
     constructor(props) {
         super(props);
+        this.selectHandler = this.selectHandler.bind(this)
+    }
+
+    selectHandler(event) {
+        eventEmitter.emit('directBV', this.props.bvid)
+        eventEmitter.emit('toggleDialogOff')
     }
 
     render() {
         return (
-                <div style={{display: "flex"}}>
-                    <img ref={this.props.href} />
-                    <div>
-                        <h3>{this.props.title}</h3>
-                        <div style={{display: "inline-block"}}>
-                            <div>{this.props.times}</div>
-                            <div>{this.props.date}</div>
-                        </div>
-                        <div style={{display: "inline-block"}}>
-                            <div>{this.props.author}</div>
-                            <div>{this.props.duration}</div>
+                    <div className="danmaku-list-item" id={this.props.bvid} onClick={this.selectHandler}>
+                        <h3 dangerouslySetInnerHTML={{__html: this.props.title}}/>
+                        <div style={{display: 'flex'}}>
+                            <div style={{display: "inline-block"}}>
+                                <div>{playTimesConverter(this.props.times)}</div>
+                                <div>{unixTimeConverter(this.props.date)}</div>
+                            </div>
+                            <div style={{display: "inline-block"}}>
+                                <div>{this.props.author}</div>
+                                <div>{this.props.duration}</div>
+                            </div>
                         </div>
                     </div>
-                </div>
             )
 
     }
@@ -466,10 +486,12 @@ function DanmakuSearchBar() {
     const classes = useStyles()
     const [msg, setMsg] = useState(null)
 
-    const searchHandler = (value) => {
+    const searchHandler = () => {
+        const value = msg
         if (value.indexOf('/BV') !== -1) {
             const bvID = value.slice(1)
             eventEmitter.emit('directBV', bvID)
+            eventEmitter.emit('toggleDialogOff')
         } else {
             chrome.runtime.sendMessage('s' + value, (response) => {
                 eventEmitter.emit('searchBarResult', response)
@@ -489,6 +511,7 @@ function DanmakuSearchBar() {
                 className={classes.input}
                 placeholder="Manually Search or Select bvID Directly!"
                 inputProps={{ 'aria-label': 'search matching video resource'}}
+                onChange={changeHandler}
             />
             <Divider className={classes.divider} orientation="vertical" />
             <IconButton onClick={searchHandler} className={classes.iconButton} aria-label="search">
@@ -562,29 +585,35 @@ class DanmakuSearchDialog extends React.Component {
     }
 
     componentDidMount() {
-        chrome.runtime.sendMessage('s' + currentVideoName, (response) => {
-            this.setState({searchResult: response})
-        })
         this.eventEmitter = eventEmitter.addListener('danmakuon', () => {
             if (!globalDanmakuFetched) {
+                console.log(currentVideoName)
+                chrome.runtime.sendMessage('s' + currentVideoName, (response) => {
+                    console.log(response)
+                    this.setState({searchResult: response.result})
+                })
                 this.setState({open: true})
             }
         })
         this.searchBarHandler = eventEmitter.addListener('searchBarResult', (msg) => {
             this.setState({searchResult: msg})
         })
+        this.toggleDialogOffHandler = eventEmitter.addListener('toggleDialogOff', () => {
+            this.setState({open: false})
+        })
     }
 
     renderDialog() {
         return (
             <div>
-                {this.state.searchResult.map((resultItem) =>
+                {(this.state.searchResult||[]).map((resultItem) =>
                     <DanmakuSearchResultItem
-                        href={resultItem.pic}
+                        author={resultItem.author}
                         title={resultItem.title}
                         times={resultItem.play}
                         date={resultItem.pubdate}
                         duration={resultItem.duration}
+                        bvid={resultItem.bvid}
                     />
                 )}
             </div>
@@ -610,10 +639,7 @@ class DanmakuSearchDialog extends React.Component {
                     <DialogContent dividers={true}>
 
                             {
-                                `Cras mattis consectetur purus sit amet fermentum.
-Cras justo odio, dapibus ac facilisis in, egestas eget quam.
-Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
-Praesent commodo cursus magna, vel scelerisque nisl consectetur et.`
+                                'We have found the following results:\n'
                             }
 
                         {this.renderDialog()}
@@ -642,8 +668,10 @@ class DanmakuSwitcher extends React.Component {
     handleChange = (event) => {
         this.setState({checked: event.target.checked})
         if (event.target.checked) {
+            console.log('danmakuon')
             eventEmitter.emit('danmakuon')
         } else {
+            console.log('danmakuoff')
             eventEmitter.emit('danmakuoff')
         }
     }
