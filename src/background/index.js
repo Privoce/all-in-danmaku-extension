@@ -82,3 +82,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         console.log(response.data.data.cid)
     })*/
 })
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (changeInfo.url) {
+        console.log('url changed.')
+        chrome.tabs.sendMessage( tabId, {
+            message: 'resetStatus'
+        })
+    }
+})
