@@ -26,7 +26,11 @@ import MenuIcon from "@material-ui/icons/Menu"
 import SearchIcon from "@material-ui/icons/Search"
 import ListIcon from "@material-ui/icons/List"
 import ReplayIcon from "@material-ui/icons/Replay"
+import TimerIcon from "@material-ui/icons/Timer"
+import PlayCircleOutlineIcon from "@material-ui/icons/PlayCircleOutline"
+import TodayIcon from "@material-ui/icons/Today"
 import Paper from '@material-ui/core/Paper';
+import {Typography} from "@material-ui/core";
 import DirectionsIcon from '@material-ui/icons/Directions';
 import InputBase from '@material-ui/core/InputBase';
 import ArrowUpwardRoundedIcon from '@material-ui/icons/ArrowUpward';
@@ -34,6 +38,7 @@ import { EventEmitter } from "events";
 import * as target from "semver";
 import { FixedSizeList } from 'react-window';
 import AutoSizer from "react-virtualized-auto-sizer";
+import {Timer} from "@material-ui/icons";
 
 
 let eventEmitter = new EventEmitter();
@@ -263,8 +268,10 @@ class DanmakuLayer extends React.Component {
         VT.ontimeupdate = () => {
             if (Array.isArray(this.state.danmakuList) && this.state.screen) {
                 // console.log(this.state.danmakuList)
-                const newIndex = this.state.danmakuList.findIndex((element) =>
-                    element.progress > Math.floor(VT.currentTime * 1000)
+                const newIndex = this.state.danmakuList.findIndex((element) => {
+                    console.log(element)
+                    return element.progress > Math.floor(VT.currentTime * 1000)}
+
                 )
                 if (VT.currentTime > 350 && this.fetchedBlocks < this.state.blocks) {
                     console.log('start multi segments fetching')
@@ -318,6 +325,8 @@ class DanmakuLayer extends React.Component {
         //TODO: do some search
         // let newBVId = prompt("Please Enter BV ID: ")
         // this.state.bvId = newBVId
+        console.log(bvid)
+        console.log(segmentIndex)
         chrome.runtime.sendMessage(bvid + '_' + segmentIndex.toString(), (response) => {
             if (response.farewell === 'success') {
                 chrome.storage.local.get([bvid], (result) => {
@@ -477,7 +486,7 @@ class DanmakuSearchResultItem extends React.Component {
 
     render() {
         return (
-                    <div className="danmaku-list-item" id={this.props.bvid} onClick={this.selectHandler}>
+                    /*<div className="danmaku-list-item" id={this.props.bvid} onClick={this.selectHandler}>
                         <h3 dangerouslySetInnerHTML={{__html: this.props.title}}/>
                         <div style={{display: 'flex'}}>
                             <div style={{display: "inline-block"}}>
@@ -489,7 +498,32 @@ class DanmakuSearchResultItem extends React.Component {
                                 <div>{this.props.duration}</div>
                             </div>
                         </div>
-                    </div>
+                    </div>*/
+                <ListItem alignItems="flex-start" onClick={this.selectHandler} button>
+                    <ListItemText
+                        primary={<h3 dangerouslySetInnerHTML={{__html: this.props.title}}/>}
+                        secondary={
+                            <React.Fragment>
+                                <Typography
+                                    component="span"
+                                    variant="body2"
+                                    style={{display: "inline"}}
+                                    color="textPrimary"
+                                >
+                                    {this.props.author + " "}
+                                </Typography>
+                                <div style={{alignItems: "center", display: "inline-block", margin: "auto", textAlign: "center"}}>
+                                    <TimerIcon />
+                                    { this.props.duration + " "}
+                                    <PlayCircleOutlineIcon />
+                                    { playTimesConverter(this.props.times) + " "}
+                                    <TodayIcon />
+                                    { unixTimeConverter(this.props.date)}
+                                </div>
+                            </React.Fragment>
+                        }
+                    />
+                </ListItem>
             )
 
     }
@@ -663,7 +697,7 @@ class DanmakuSearchDialog extends React.Component {
 
     renderDialog() {
         return (
-            <div>
+            <List style={{width: '100%'}}>
                 {(this.state.searchResult||[]).map((resultItem) =>
                     <DanmakuSearchResultItem
                         author={resultItem.author}
@@ -674,7 +708,7 @@ class DanmakuSearchDialog extends React.Component {
                         bvid={resultItem.bvid}
                     />
                 )}
-            </div>
+            </List>
         )
     }
 
