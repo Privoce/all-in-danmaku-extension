@@ -119,3 +119,11 @@ input:checked + .slider:before {
     color: #f25d8e;
 }
 
+.search-result-text-span {
+    margin-right: 8px;
+}
+
+em {
+   font-style: normal;
+}
+

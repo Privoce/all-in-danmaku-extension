@@ -54,6 +54,7 @@ import Input from '@material-ui/core/Input';
 import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
 import {Timer} from "@material-ui/icons";
+import Grid from "@material-ui/core/Grid"
 
 
 let eventEmitter = new EventEmitter();
@@ -525,6 +526,7 @@ class DanmakuSearchResultItem extends React.Component {
                     </div>*/
                 <ListItem alignItems="flex-start" onClick={this.selectHandler} button>
                     <ListItemText
+                        style={{fontSize: "normal"}}
                         primary={<h3 dangerouslySetInnerHTML={{__html: this.props.title}}/>}
                         secondary={
                             <React.Fragment>
@@ -534,16 +536,18 @@ class DanmakuSearchResultItem extends React.Component {
                                     style={{display: "inline"}}
                                     color="textPrimary"
                                 >
-                                    {this.props.author + " "}
+                                    {this.props.author}
                                 </Typography>
-                                <div style={{alignItems: "center", display: "inline-block", margin: "auto", textAlign: "center"}}>
-                                    <TimerIcon />
-                                    { this.props.duration + " "}
-                                    <PlayCircleOutlineIcon />
-                                    { playTimesConverter(this.props.times) + " "}
-                                    <TodayIcon />
-                                    { unixTimeConverter(this.props.date)}
-                                </div>
+
+                                <Typography style={{display: "flex", alignItems: "center"}}>
+                                    <TimerIcon fontSize="small"/>
+                                    <span className="search-result-text-span">{this.props.duration + " "}</span>
+                                    <PlayCircleOutlineIcon fontSize="small"/>
+                                    <span className="search-result-text-span">{ playTimesConverter(this.props.times) + " "}</span>
+                                    <TodayIcon fontSize="small"/>
+                                    <span className="search-result-text-span">{ unixTimeConverter(this.props.date)}</span>
+                                </Typography>
+
                             </React.Fragment>
                         }
                     />
