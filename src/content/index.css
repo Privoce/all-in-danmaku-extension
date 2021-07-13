@@ -119,6 +119,3 @@ input:checked + .slider:before {
     color: #f25d8e;
 }
 
-.danmaku-list-item:hover {
-    background-color: #bfbfbf;
-}

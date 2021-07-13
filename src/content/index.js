@@ -26,7 +26,11 @@ import MenuIcon from "@material-ui/icons/Menu"
 import SearchIcon from "@material-ui/icons/Search"
 import ListIcon from "@material-ui/icons/List"
 import ReplayIcon from "@material-ui/icons/Replay"
+import TimerIcon from "@material-ui/icons/Timer"
+import PlayCircleOutlineIcon from "@material-ui/icons/PlayCircleOutline"
+import TodayIcon from "@material-ui/icons/Today"
 import Paper from '@material-ui/core/Paper';
+import {Typography} from "@material-ui/core";
 import DirectionsIcon from '@material-ui/icons/Directions';
 import InputBase from '@material-ui/core/InputBase';
 import ArrowUpwardRoundedIcon from '@material-ui/icons/ArrowUpward';
@@ -34,6 +38,7 @@ import { EventEmitter } from "events";
 import * as target from "semver";
 import { FixedSizeList } from 'react-window';
 import AutoSizer from "react-virtualized-auto-sizer";
+import {Timer} from "@material-ui/icons";
 
 
 let eventEmitter = new EventEmitter();
@@ -66,7 +71,7 @@ function getVideoPlayer() {
     return video;
 }
 
-const VT = getVideoPlayer()
+let VT = getVideoPlayer()
 let playBackIndex = 0
 
 console.log(VT.style.width)
@@ -84,25 +89,15 @@ chrome.storage.local.get(['videoname'], (result) => {
 
 const switcher = document.getElementById('all-in-danmaku-switcher')
 
-const parentVideoContainer = document.querySelector(".html5-video-container")
-const abstractLayer = document.createElement('div')
+let parentVideoContainer = document.querySelector(".html5-video-container")
+let abstractLayer = document.createElement('div')
 abstractLayer.id = 'danmaku-abstract-layer'
 abstractLayer.className = 'extension-top-layer'
 parentVideoContainer.appendChild(abstractLayer)
 
-const videoTitle = document.querySelector('meta[name~="title"]')
-const currentVideoName = videoTitle && videoTitle.getAttribute("content")
+let videoTitle = document.querySelector('meta[name~="title"]')
+let currentVideoName = videoTitle && videoTitle.getAttribute("content")
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message === 'success') {
-        chrome.storage.local.get(['danmakuData'], (result) => {
-            console.log('print first data elem' + result.danmakuData.elem[0])
-        })
-        chrome.storage.local.get(['danmakuData'], (result) => {
-            console.log(result)
-        })
-    }
-})
 
 function unixTimeConverter(timeStamp) {
     let date = new Date(timeStamp * 1000)
@@ -215,6 +210,21 @@ class DanmakuLayer extends React.Component {
         this.multiSegmentsHandler = eventEmitter.addListener('continueFetch', (segmentIndex) => {
             this.tryGetDanmaku(this.state.bvid, segmentIndex)
         })
+        this.resetHandler = eventEmitter.addListener('reset', () => {
+            // VT = getVideoPlayer()
+            if (this.state.screen) this.state.screen.clear()
+            this.setState({
+                blocks: 0,
+                bvid: null,
+                danmakuList: null,
+                // timeStamp: 0,
+                screen: null,
+                // intervalID: null,
+                width: VT.style.height,
+                height: VT.style.width,
+                msg:null,
+            })
+        })
         /*const resizeObserver = new ResizeObserver(entries => {
             for (let entry of entries) {
                 if (entry.width) {
@@ -257,8 +267,11 @@ class DanmakuLayer extends React.Component {
         }
         VT.ontimeupdate = () => {
             if (Array.isArray(this.state.danmakuList) && this.state.screen) {
-                const newIndex = this.state.danmakuList.findIndex((element) =>
-                    element.progress > Math.floor(VT.currentTime * 1000)
+                // console.log(this.state.danmakuList)
+                const newIndex = this.state.danmakuList.findIndex((element) => {
+                    console.log(element)
+                    return element.progress > Math.floor(VT.currentTime * 1000)}
+
                 )
                 if (VT.currentTime > 350 && this.fetchedBlocks < this.state.blocks) {
                     console.log('start multi segments fetching')
@@ -312,6 +325,8 @@ class DanmakuLayer extends React.Component {
         //TODO: do some search
         // let newBVId = prompt("Please Enter BV ID: ")
         // this.state.bvId = newBVId
+        console.log(bvid)
+        console.log(segmentIndex)
         chrome.runtime.sendMessage(bvid + '_' + segmentIndex.toString(), (response) => {
             if (response.farewell === 'success') {
                 chrome.storage.local.get([bvid], (result) => {
@@ -471,7 +486,7 @@ class DanmakuSearchResultItem extends React.Component {
 
     render() {
         return (
-                    <div className="danmaku-list-item" id={this.props.bvid} onClick={this.selectHandler}>
+                    /*<div className="danmaku-list-item" id={this.props.bvid} onClick={this.selectHandler}>
                         <h3 dangerouslySetInnerHTML={{__html: this.props.title}}/>
                         <div style={{display: 'flex'}}>
                             <div style={{display: "inline-block"}}>
@@ -483,7 +498,32 @@ class DanmakuSearchResultItem extends React.Component {
                                 <div>{this.props.duration}</div>
                             </div>
                         </div>
-                    </div>
+                    </div>*/
+                <ListItem alignItems="flex-start" onClick={this.selectHandler} button>
+                    <ListItemText
+                        primary={<h3 dangerouslySetInnerHTML={{__html: this.props.title}}/>}
+                        secondary={
+                            <React.Fragment>
+                                <Typography
+                                    component="span"
+                                    variant="body2"
+                                    style={{display: "inline"}}
+                                    color="textPrimary"
+                                >
+                                    {this.props.author + " "}
+                                </Typography>
+                                <div style={{alignItems: "center", display: "inline-block", margin: "auto", textAlign: "center"}}>
+                                    <TimerIcon />
+                                    { this.props.duration + " "}
+                                    <PlayCircleOutlineIcon />
+                                    { playTimesConverter(this.props.times) + " "}
+                                    <TodayIcon />
+                                    { unixTimeConverter(this.props.date)}
+                                </div>
+                            </React.Fragment>
+                        }
+                    />
+                </ListItem>
             )
 
     }
@@ -513,6 +553,7 @@ const useStyles = makeStyles((theme) => ({
 function DanmakuSearchBar() {
     const classes = useStyles()
     const [msg, setMsg] = useState(null)
+    let inputField = null
 
     const searchHandler = () => {
         const value = msg
@@ -528,6 +569,7 @@ function DanmakuSearchBar() {
                 }
 
             })
+            inputField.value = ""
         }
     }
     const changeHandler = (event) => {
@@ -544,6 +586,7 @@ function DanmakuSearchBar() {
                 placeholder="Manually Search or Select bvID Directly!"
                 inputProps={{ 'aria-label': 'search matching video resource'}}
                 onChange={changeHandler}
+                inputRef={(re) => inputField = re}
             />
             <Divider className={classes.divider} orientation="vertical" />
             <IconButton onClick={searchHandler} className={classes.iconButton} aria-label="search">
@@ -601,7 +644,8 @@ class DanmakuSearchDialog extends React.Component {
         super(props);
         this.state = {
             open: false,
-            searchResult: null
+            searchResult: null,
+            videoName: currentVideoName
         }
         this.openDialog = this.openDialog.bind(this)
         this.toggleDialog = this.toggleDialog.bind(this)
@@ -619,8 +663,13 @@ class DanmakuSearchDialog extends React.Component {
     componentDidMount() {
         this.eventEmitter = eventEmitter.addListener('danmakuon', () => {
             if (!globalDanmakuFetched) {
-                console.log(currentVideoName)
-                chrome.runtime.sendMessage('s' + currentVideoName, (response) => {
+                let videoTitle = document.querySelector('.title yt-formatted-string.ytd-video-primary-info-renderer').innerHTML
+                this.setState({
+                    videoName: videoTitle,
+                    searchResult: null
+                })
+                console.log(this.state.videoName)
+                chrome.runtime.sendMessage('s' + videoTitle, (response) => {
                     console.log(response)
                     this.setState({searchResult: response.result})
                 })
@@ -634,11 +683,21 @@ class DanmakuSearchDialog extends React.Component {
         this.toggleDialogOffHandler = eventEmitter.addListener('toggleDialogOff', () => {
             this.setState({open: false})
         })
+        this.resetHandler = eventEmitter.addListener('reset', () => {
+            // let videoTitle = document.querySelector('meta[name~="title"]')
+            // let currentVideoName = videoTitle && videoTitle.getAttribute("content")
+            let videoTitle = document.querySelector('.title yt-formatted-string.ytd-video-primary-info-renderer').innerHTML
+            console.log(videoTitle)
+            this.setState({
+                videoName: videoTitle,
+                searchResult: null
+            })
+        })
     }
 
     renderDialog() {
         return (
-            <div>
+            <List style={{width: '100%'}}>
                 {(this.state.searchResult||[]).map((resultItem) =>
                     <DanmakuSearchResultItem
                         author={resultItem.author}
@@ -649,7 +708,7 @@ class DanmakuSearchDialog extends React.Component {
                         bvid={resultItem.bvid}
                     />
                 )}
-            </div>
+            </List>
         )
     }
 
@@ -709,6 +768,12 @@ class DanmakuSwitcher extends React.Component {
         }
     }
 
+    componentDidMount() {
+        eventEmitter.addListener('reset', () => {
+            this.setState({checked: false})
+        })
+    }
+
     render() {
         return (
             <FormControlLabel control={
@@ -745,6 +810,26 @@ ReactDOM.render(<DanmakuToolBar />, toolBar)
 
 // let instanceLayer = 0;
 ReactDOM.render(<DanmakuLayer value={currentVideoName}/>, abstractLayer);
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    console.log(message.message)
+    if (message.message === 'success') {
+        chrome.storage.local.get(['danmakuData'], (result) => {
+            console.log('print first data elem' + result.danmakuData.elem[0])
+        })
+        chrome.storage.local.get(['danmakuData'], (result) => {
+            console.log(result)
+        })
+    } else if (message.message === 'resetStatus') {
+        eventEmitter.emit('reset')
+    }
+})
+eventEmitter.addListener('reset', () => {
+    // VT = getVideoPlayer()
+    videoTitle = document.querySelector('meta[name~="title"]')
+    currentVideoName = videoTitle && videoTitle.getAttribute("content")
+    globalDanmakuFetched = 0
+})
 
 /*setTimeout(() => {
     console.log(VT.getCurrentTime())
