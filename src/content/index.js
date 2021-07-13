@@ -261,10 +261,11 @@ class DanmakuLayer extends React.Component {
                     element.progress > Math.floor(VT.currentTime * 1000)
                 )
                 if (VT.currentTime * 1000 > 350 && this.fetchedBlocks < this.state.blocks) {
-                    this.fetchedBlocks = this.state.blocks
+                    console.log('start multi segments fetching')
                     for (let i = this.fetchedBlocks + 1; i <= this.state.blocks; i++) {
                         eventEmitter.emit('continueFetch', i)
                     }
+                    this.fetchedBlocks = this.state.blocks
                 }
                 if (newIndex === -1) return;
                 if (this.state.danmakuList[newIndex].progress - this.state.danmakuList[playBackIndex].progress > 10000
