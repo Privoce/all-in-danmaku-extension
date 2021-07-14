@@ -7,6 +7,7 @@ const MsgStyle = {
     opacity:'1',
     color: '#FFFFFF',
     textShadow: '1px 1px #000000, 1px -1px #000000, -1px -1px #000000, -1px 1px #000000',
+    fontFamily: 'SimHei'
 };
 const sizes = {
     small: '18px',
@@ -20,7 +21,7 @@ const StyledDanmaku = ({ msg, size = 'small', color , alpha}) => {
     MsgStyle.opacity=alpha;
     MsgStyle.color=color;
     MsgStyle.fontSize=sizes[size];
-    console.log("#1 msg get "+MsgStyle.opacity+" "+MsgStyle.color+" "+MsgStyle.fontSize)
+    // console.log("#1 msg get "+MsgStyle.opacity+" "+MsgStyle.color+" "+MsgStyle.fontSize)
     return (
         <div>
             <div style={MsgStyle}>{msg}</div>
