@@ -1,61 +1,33 @@
 /* Global Chrome */
-import React, {useEffect, useState} from 'react'
+import React, {useState} from 'react'
 import ReactDOM from 'react-dom'
 import './index.css'
-import {fetchDanmaku} from "@/api/danmaku";
 import BulletScreen from "rc-bullets";
-import {Drawer, makeStyles,withStyles} from "@material-ui/core";
+import {makeStyles} from "@material-ui/core";
 import List from "@material-ui/core/List"
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import Divider from "@material-ui/core/Divider";
 import Switch from "@material-ui/core/Switch";
-import FormGroup from "@material-ui/core/FormGroup"
 import FormControlLabel from "@material-ui/core/FormControlLabel"
 import Dialog from "@material-ui/core/Dialog"
 import DialogTitle from "@material-ui/core/DialogTitle"
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent"
-import DialogContentText from "@material-ui/core/DialogContentText";
 import Button from "@material-ui/core/Button"
 import IconButton from "@material-ui/core/IconButton"
-import Tabs from "@material-ui/core/Tabs"
-import Tab from "@material-ui/core/Tab"
 import MenuIcon from "@material-ui/icons/Menu"
 import SearchIcon from "@material-ui/icons/Search"
-import ListIcon from "@material-ui/icons/List"
 import ReplayIcon from "@material-ui/icons/Replay"
 import TimerIcon from "@material-ui/icons/Timer"
 import PlayCircleOutlineIcon from "@material-ui/icons/PlayCircleOutline"
 import TodayIcon from "@material-ui/icons/Today"
-import Paper from '@material-ui/core/Paper';
 import {Typography} from "@material-ui/core";
 import InputBase from '@material-ui/core/InputBase';
-import ArrowUpwardRoundedIcon from '@material-ui/icons/ArrowUpward';
-import { EventEmitter } from "events";
-import { FixedSizeList } from 'react-window';
-import AutoSizer from "react-virtualized-auto-sizer";
 import StyledDanmaku from "@/api/StyledDanmaku";
-import MenuItem from '@material-ui/core/MenuItem';
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
-import Grow from '@material-ui/core/Grow';
-import Popper from '@material-ui/core/Popper';
-import MenuList from '@material-ui/core/MenuList';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import FormControl from '@material-ui/core/FormControl';
-import FormLabel from '@material-ui/core/FormLabel';
-import Grid from '@material-ui/core/Grid';
-import Slider from '@material-ui/core/Slider';
-import Input from '@material-ui/core/Input';
-import Select from '@material-ui/core/Select';
-import InputLabel from '@material-ui/core/InputLabel';
 import DanmakuSendBar from "@/lib/DanmakuSendBar";
 import DanmakuSideBar from "@/lib/DanmakuSidebar";
 import {eventEmitter} from "@/lib/Helper";
-
-//let eventEmitter = new EventEmitter();
-
 
 let globalDanmakuFetched = 0;
 let globalComponentLoaded = 0;

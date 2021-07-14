@@ -8,6 +8,21 @@ import ListIcon from "@material-ui/icons/List";
 import {Drawer} from "@material-ui/core";
 import {eventEmitter} from "./Helper";
 
+
+function progresstimeConverter(progress){
+    return (progress/1000/60).toFixed().padStart(2,'0')+":"+(progress/1000%60).toFixed().padStart(2,'0')
+}
+
+function renderRowFixed(isNull){
+    if (isNull){
+        return ({ index, style }) => (
+            <div style={style}>{"   "+progresstimeConverter(this.state.danmakuList[index].progress)+"      "+this.state.danmakuList[index].content}</div>
+        )
+    }else{
+        return <div>"no danmakulist info"</div>
+    }
+}
+
 class DanmakuSideBar extends React.Component {
     constructor(props) {
         super(props);
@@ -17,6 +32,7 @@ class DanmakuSideBar extends React.Component {
             display: false,
             danmakuList:null,
         }
+        console.log("sidebar build")
     }
 
     componentDidMount(){
@@ -45,7 +61,7 @@ class DanmakuSideBar extends React.Component {
     renderList() {
         let isNull = this.state.danmakuList==null;
         const renderRow = ({ index, style }) => (
-            <div style={style}>{isNull?"no danmakulist info":this.state.danmakuList[index].content}</div>
+            <div style={style}>{isNull?"no danmakulist info":"   "+progresstimeConverter(this.state.danmakuList[index].progress)+"   "+this.state.danmakuList[index].content}</div>
         );
         return (
             <div
