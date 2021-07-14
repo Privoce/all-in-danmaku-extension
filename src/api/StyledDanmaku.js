@@ -9,6 +9,7 @@ const MsgStyle = {
     textShadow: '1px 1px #000000, 1px -1px #000000, -1px -1px #000000, -1px 1px #000000',
     fontFamily: 'SimHei'
 };
+
 const sizes = {
     small: '18px',
     normal: '25px',
