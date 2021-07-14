@@ -3,9 +3,8 @@ import React, {useEffect, useState} from 'react'
 import ReactDOM from 'react-dom'
 import './index.css'
 import {fetchDanmaku} from "@/api/danmaku";
-import BulletScreen, {StyledBullet} from "rc-bullets";
+import BulletScreen from "rc-bullets";
 import {Drawer, makeStyles,withStyles} from "@material-ui/core";
-import SwipeableDrawer from "@material-ui/core/SwipeableDrawer";
 import List from "@material-ui/core/List"
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
@@ -51,11 +50,16 @@ import Slider from '@material-ui/core/Slider';
 import Input from '@material-ui/core/Input';
 import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
+import DanmakuSendBar from "@/lib/DanmakuSendBar";
+import DanmakuSideBar from "@/lib/DanmakuSidebar";
+import {eventEmitter} from "@/lib/Helper";
 
-let eventEmitter = new EventEmitter();
+//let eventEmitter = new EventEmitter();
 
 
 let globalDanmakuFetched = 0;
+let globalComponentLoaded = 0;
+let globalLayerMounted = 0;
 
 function getVideoPlayer() {
     let videos = Array.from(document.querySelectorAll('video')).filter((v) => !!v.src);
@@ -76,24 +80,31 @@ function getVideoPlayer() {
 let VT = getVideoPlayer()
 let playBackIndex = 0
 
-const switcher = document.getElementById('all-in-danmaku-switcher')
-
 let parentVideoContainer = document.querySelector(".html5-video-container")
 let abstractLayer = document.createElement('div')
 abstractLayer.id = 'danmaku-abstract-layer'
 abstractLayer.className = 'extension-top-layer'
-parentVideoContainer.appendChild(abstractLayer)
 
 let sizeReferenceContainer = document.querySelector(".html5-video-player")
 
 let videoTitle = document.querySelector('meta[name~="title"]')
 let currentVideoName = videoTitle && videoTitle.getAttribute("content")
 
-const infoBar = document.getElementById('info')
-const toolBar = document.createElement('div')
-const referenceBar = document.getElementById('info-contents')
+let infoBar = document.getElementById('info')
+let toolBar = document.createElement('div')
+let referenceBar = document.getElementById('info-contents')
 toolBar.id = 'all-in-danmaku-toolbar'
-infoBar.insertBefore(toolBar, referenceBar)
+
+
+/*chrome.tabs.query({currentWindow: true, active: true}, (tabs) => {
+    if (tabs[0].url.indexOf('watch?v') !== -1) {
+        parentVideoContainer.appendChild(abstractLayer)
+        infoBar.insertBefore(toolBar, referenceBar)
+    }
+})*/
+
+console.log('init')
+
 
 
 function unixTimeConverter(timeStamp) {
@@ -133,6 +144,8 @@ class DanmakuLayer extends React.Component {
     }
 
     componentDidMount() {
+        this.VT = getVideoPlayer()
+        console.log(this.VT)
         const switcher = document.getElementById('all-in-danmaku-switcher')
         // 声明一个自定义事件
         this.eventEmitter = eventEmitter.addListener("sendDanmaku",(msg,color,alpha,size)=>{
@@ -178,8 +191,8 @@ class DanmakuLayer extends React.Component {
                 bvid: null,
                 danmakuList: null,
                 screen: null,
-                width: VT.style.height,
-                height: VT.style.width,
+                width: this.VT.style.height,
+                height: this.VT.style.width,
                 msg:null,
             })
         })
@@ -197,27 +210,27 @@ class DanmakuLayer extends React.Component {
             }
         })
         resizeObserver.observe(sizeReferenceContainer)
-        VT.onpause = () => {
+        this.VT.onpause = () => {
             console.log('pause')
             if (this.state.screen) {
                 this.state.screen.pause()
             }
 
         }
-        VT.onplay = () => {
+        this.VT.onplay = () => {
             console.log('play')
             if (this.state.screen) {
                 this.state.screen.resume()
             }
 
         }
-        VT.ontimeupdate = () => {
+        this.VT.ontimeupdate = () => {
             if (Array.isArray(this.state.danmakuList) && this.state.screen) {
                 const newIndex = this.state.danmakuList.findIndex((element) => {
-                    return element.progress > Math.floor(VT.currentTime * 1000)}
+                    return element.progress > Math.floor(this.VT.currentTime * 1000)}
 
                 )
-                if (VT.currentTime > 350 && this.fetchedBlocks < this.state.blocks) {
+                if (this.VT.currentTime > 350 && this.fetchedBlocks < this.state.blocks) {
                     console.log('start multi segments fetching')
                     for (let i = this.fetchedBlocks + 1; i <= this.state.blocks; i++) {
                         eventEmitter.emit('continueFetch', i)
@@ -249,10 +262,10 @@ class DanmakuLayer extends React.Component {
                 }
             }
         }
-        VT.onloadeddata = () => {
+        this.VT.onloadeddata = () => {
             this.setState({
-                width: VT.style.width,
-                height: VT.style.height
+                width: this.VT.style.width,
+                height: this.VT.style.height
             })
         }
     }
@@ -550,6 +563,10 @@ class DanmakuSwitcher extends React.Component {
     handleChange = (event) => {
         this.setState({checked: event.target.checked})
         if (event.target.checked) {
+            if (!globalLayerMounted) {
+                ReactDOM.render(<DanmakuLayer value={currentVideoName}/>, abstractLayer);
+                globalLayerMounted = 1
+            }
             console.log('danmakuon')
             eventEmitter.emit('danmakuon')
         } else {
@@ -596,8 +613,8 @@ function DanmakuToolBar(props) {
     )
 }
 
-ReactDOM.render(<DanmakuToolBar />, toolBar)
-ReactDOM.render(<DanmakuLayer value={currentVideoName}/>, abstractLayer);
+//ReactDOM.render(<DanmakuToolBar />, toolBar)
+//ReactDOM.render(<DanmakuLayer value={currentVideoName}/>, abstractLayer);
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log(message.message)
@@ -609,11 +626,39 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             console.log(result)
         })
     } else if (message.message === 'resetStatus') {
-        eventEmitter.emit('reset')
+        eventEmitter.emit('resetInit', message.url)
     }
 })
-eventEmitter.addListener('reset', () => {
-    videoTitle = document.querySelector('meta[name~="title"]')
-    currentVideoName = videoTitle && videoTitle.getAttribute("content")
+eventEmitter.addListener('resetInit', (url) => {
+    //videoTitle = document.querySelector('meta[name~="title"]')
+    //currentVideoName = videoTitle && videoTitle.getAttribute("content")
     globalDanmakuFetched = 0
+    console.log('reset')
+    console.log(url)
+    if (!globalComponentLoaded && url.indexOf('watch?v') !== -1) {
+        VT = getVideoPlayer()
+        playBackIndex = 0
+
+        parentVideoContainer = document.querySelector(".html5-video-container")
+        abstractLayer = document.createElement('div')
+        abstractLayer.id = 'danmaku-abstract-layer'
+        abstractLayer.className = 'extension-top-layer'
+        parentVideoContainer.appendChild(abstractLayer)
+
+        sizeReferenceContainer = document.querySelector(".html5-video-player")
+
+        videoTitle = document.querySelector('meta[name~="title"]')
+        currentVideoName = videoTitle && videoTitle.getAttribute("content")
+
+        infoBar = document.getElementById('info')
+        toolBar = document.createElement('div')
+        referenceBar = document.getElementById('info-contents')
+        toolBar.id = 'all-in-danmaku-toolbar'
+        infoBar.insertBefore(toolBar, referenceBar)
+
+        ReactDOM.render(<DanmakuToolBar />, toolBar)
+        //ReactDOM.render(<DanmakuLayer value={currentVideoName}/>, abstractLayer);
+        globalComponentLoaded = 1;
+    }
+    eventEmitter.emit('reset')
 })
