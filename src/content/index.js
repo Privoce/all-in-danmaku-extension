@@ -37,7 +37,7 @@ import ArrowUpwardRoundedIcon from '@material-ui/icons/ArrowUpward';
 import { EventEmitter } from "events";
 import { FixedSizeList } from 'react-window';
 import AutoSizer from "react-virtualized-auto-sizer";
-import StyledDanmaku from "../api/StyledDanmaku";
+import StyledDanmaku from "@/api/StyledDanmaku";
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
@@ -54,9 +54,9 @@ import Input from '@material-ui/core/Input';
 import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
 import {Timer} from "@material-ui/icons";
-
-
-let eventEmitter = new EventEmitter();
+import DanmakuSideBar from "@/lib/DanmakuSidebar";
+import {StyledMenuItem,eventEmitter} from "@/lib/Helper";
+import DanmakuSendBar from "@/lib/DanmakuSendBar";
 
 const YoutubePlayerState = {
     "UNSTARTED": -1,
@@ -68,12 +68,6 @@ const YoutubePlayerState = {
 };
 
 let globalDanmakuFetched = 0;
-
-const StyledMenuItem = withStyles((theme) => ({
-    root: {
-
-    },
-}))(MenuItem);
 
 function getVideoPlayer() {
     let videos = Array.from(document.querySelectorAll('video')).filter((v) => !!v.src);
@@ -424,94 +418,6 @@ class DanmakuLayer extends React.Component {
     }
 }
 
-class DanmakuSidebar extends React.Component {
-    constructor(props) {
-        super(props);
-        // this.classes = sidebarStyle();
-        this.state = {
-            videoName: props.value,
-            display: false,
-            danmakuList:null,
-        }
-    }
-
-    componentDidMount(){
-        this.eventEmitter = eventEmitter.addListener("danmakuFetched",(bvid)=>{
-            chrome.storage.local.get([bvid],(result)=>{
-                this.setState({danmakuList:result[bvid]})
-            })
-        });
-    }
-
-    componentWillUnmount(){
-        eventEmitter.removeListener(this.eventEmitter);
-    }
-
-    toggleSidebar(open) {
-        return (event) => {
-            if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
-                return;
-            }
-            this.setState({
-                display: open
-            });
-        }
-    }
-
-    renderList() {
-        let isNull = this.state.danmakuList==null;
-        const renderRow = ({ index, style }) => (
-            <div style={style}>{isNull?"no danmakulist info":this.state.danmakuList[index].content}</div>
-        );
-        return (
-            <div
-                className="danmaku-sidebar"
-                role="presentation"
-                onKeyDown={this.toggleSidebar(false)}
-            >
-                <Tabs className="tab-space-holder">
-
-                </Tabs>
-                <Tabs
-                    variant="fullWidth"
-                >
-                    <Tab label="Danmaku List" />
-                </Tabs>
-                <AutoSizer>
-                    {({ height, width }) => (
-                        <FixedSizeList
-                            className="danmakulist"
-                            height={height-96}
-                            itemCount={isNull?1:this.state.danmakuList.length}
-                            itemSize={35}
-                            width={width}
-                            style={{paddingLeft: '2px'}}
-                        >
-                            {renderRow}
-                        </FixedSizeList>
-                    )}
-                </AutoSizer>
-            </div>
-        )
-    }
-
-    render() {
-        return (
-                <div>
-                    <React.Fragment key={'right'}>
-                        <IconButton onClick={this.toggleSidebar(true)} style={{padding: 10}}>
-                            <ListIcon />
-                        </IconButton>
-                        <Drawer anchor={'right'} open={this.state.display} onClose={this.toggleSidebar(false)} className="sidedrawer">
-                            {this.renderList()}
-                        </Drawer>
-                    </React.Fragment>
-                </div>
-            )
-
-    }
-}
-
 class DanmakuSearchResultItem extends React.Component {
     constructor(props) {
         super(props);
@@ -636,194 +542,6 @@ function DanmakuSearchBar() {
             </IconButton>
         </div>
     );
-}
-
-class DanmakuSendBar extends React.Component {
-
-    constructor(props) {
-        super(props);
-        this.state={
-            msg:null,
-            anchorEl:null,
-            open:false,
-            sizeValue:"small",
-            alphaValue:1.0,
-            colorValue:"#FFFFFF",
-        }
-        this.anchorRef = React.createRef();
-        this.handleChange = this.handleChange.bind(this);
-        this.handleClick = this.handleClick.bind(this);
-        this.handleClose = this.handleClose.bind(this);
-        this.handleToggle = this.handleToggle.bind(this);
-        this.handleSizeChange = this.handleSizeChange.bind(this);
-        this.handleAlphaSliderChange = this.handleAlphaSliderChange.bind(this);
-        this.handleAlphaInputChange = this.handleAlphaInputChange.bind(this);
-        this.handleBlur = this.handleBlur.bind(this);
-        this.handleColorChange=this.handleColorChange.bind(this);
-    }
-
-    handleChange(event) {
-        this.setState({msg: event.target.value});
-    }
-
-    handleClick(event){
-        this.setState({anthorEl:event.currentTarget});
-    };
-
-    handleToggle(){
-        this.setState({open:!this.state.open})
-    };
-
-    handleSizeChange(event){
-        this.setState({sizeValue:event.target.value})
-    };
-
-    handleClose(event){
-        if (this.anchorRef.current && this.anchorRef.current.contains(event.target)) {
-            return;
-        }
-
-        this.setState({open:false});
-    };
-
-    handleListKeyDown(event) {
-        if (event.key === 'Tab') {
-            event.preventDefault();
-            this.setState({open:false});
-        }
-    }
-
-    handleAlphaSliderChange(event, newValue){
-        this.setState({alphaValue:newValue})
-    }
-
-    handleAlphaInputChange(event){
-        this.setState({alphaValue:event.target.value === '' ? '' : Number(event.target.value)})
-    }
-
-    handleBlur(){
-        if (value < 0) {
-            this.setState({alphaValue:0});
-        } else if (value > 1) {
-            this.setState({alphaValue:1})
-        }
-    }
-
-    handleColorChange(event){
-        this.setState({colorValue:event.target.value})
-    }
-
-    render() {
-        const sendDanmaku = (msg) => {
-            return () => {
-                // 触发自定义事件
-                eventEmitter.emit("sendDanmaku",msg,this.state.colorValue,this.state.alphaValue,this.state.sizeValue)
-            }
-        }
-        return (
-            <Paper component="form" className="danmaku-sendbar-root">
-                <IconButton className="danmaku-sendbar-iconButton"
-                            aria-label="menu"
-                            ref={this.anchorRef}
-                            aria-controls={this.state.open ? 'menu-list-grow' : undefined}
-                            aria-haspopup="true"
-                            onClick={this.handleToggle}>
-                    <MenuIcon fontsize="small"/>
-                </IconButton>
-                <Popper open={this.state.open} anchorEl={this.anchorRef.current} role={undefined} transition disablePortal>
-                    {({ TransitionProps, placement }) => (
-                        <Grow
-                            {...TransitionProps}
-                            style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom' }}
-                        >
-                            <Paper>
-                                <ClickAwayListener onClickAway={this.handleClose}>
-                                    <MenuList autoFocusItem={this.state.open} id="menu-list-grow" onKeyDown={this.handleListKeyDown} dense={true}>
-                                        <StyledMenuItem>
-                                            <FormControl component="fieldset">
-                                                <FormLabel component="legend">FontSize</FormLabel>
-                                                <RadioGroup aria-label="gender" name="gender1" value={this.state.sizeValue} row onChange={this.handleSizeChange}>
-                                                    <FormControlLabel value="small" control={<Radio />} label="Small" />
-                                                    <FormControlLabel value="normal" control={<Radio />} label="Normal" />
-                                                </RadioGroup>
-                                            </FormControl>
-                                        </StyledMenuItem>
-                                        <StyledMenuItem>
-                                            <div style={{width:150}}>
-                                                <Typography id="input-slider" gutterBottom>
-                                                    Alpha
-                                                </Typography>
-                                                <Grid container spacing={2} alignItems="center">
-                                                    <Grid item xs>
-                                                        <Slider
-                                                            value={typeof this.state.alphaValue === 'number' ? this.state.alphaValue : 1}
-                                                            defaultValue={1}
-                                                            step={0.1}
-                                                            min={0}
-                                                            max={1}
-                                                            onChange={this.handleAlphaSliderChange}
-                                                            aria-labelledby="input-slider"
-                                                            style={{width:85}}
-                                                        />
-                                                    </Grid>
-                                                    <Grid item>
-                                                        <Input
-                                                            value={this.state.alphaValue}
-                                                            margin="dense"
-                                                            onChange={this.handleAlphaInputChange}
-                                                            onBlur={this.handleBlur}
-                                                            inputProps={{
-                                                                step: 0.1,
-                                                                min: 0,
-                                                                max: 1,
-                                                                type: 'number',
-                                                                'aria-labelledby': 'input-slider',
-                                                            }}
-                                                            style={{width:42}}
-                                                        />
-                                                    </Grid>
-                                                </Grid>
-                                            </div>
-                                        </StyledMenuItem>
-                                        <StyledMenuItem>
-                                            <FormControl>
-                                                <InputLabel >Color</InputLabel>
-                                                <Select
-                                                    native
-                                                    value={this.state.colorValue}
-                                                    onChange={this.handleColorChange}
-                                                >
-                                                    <option value={"#FFFFFF"} style={{color:"#FFFFFF"}}>White</option>
-                                                    <option value={"#323338"} style={{color:"#323338"}}>Dark</option>
-                                                    <option value={"#00C875"} style={{color:"#00C875"}}>Green</option>
-                                                    <option value={"#E2445C"} style={{color:"#E2445C"}}>Red</option>
-                                                    <option value={"#579BFC"} style={{color:"#579BFC"}}>LightBlue</option>
-                                                    <option value={"#FFCB00"} style={{color:"#FFCB00"}}>EggYolk</option>
-                                                </Select>
-                                            </FormControl>
-                                        </StyledMenuItem>
-                                    </MenuList>
-                                </ClickAwayListener>
-                            </Paper>
-                        </Grow>
-                    )}
-                </Popper>
-                <InputBase
-                    className="danmaku-sendbar-input"
-                    placeholder="Send a friendly danmaku"
-                    inputProps={{ 'aria-label': 'Send a friendly danmaku'}}
-                    onChange={this.handleChange}
-                />
-                {/*<IconButton type="submit" className="danmaku-sendbar-iconButton" aria-label="search">*/}
-                {/*    <SearchIcon />*/}
-                {/*</IconButton>*/}
-                <Divider className="danmaku-sendbar-divider" orientation="vertical" />
-                <IconButton color="primary" className="danmaku-sendbar-iconButton" aria-label="arrowupward" onClick={sendDanmaku(this.state.msg)}>
-                    <ArrowUpwardRoundedIcon fontSize="small"/>
-                </IconButton>
-            </Paper>
-        );
-    }
 }
 
 class DanmakuSearchDialog extends React.Component {
@@ -986,7 +704,7 @@ function DanmakuToolBar(props) {
             </div>
             <div className="toolbar-right">
                 <DanmakuSearchDialog />
-                <DanmakuSidebar />
+                <DanmakuSideBar />
             </div>
 
         </div>
