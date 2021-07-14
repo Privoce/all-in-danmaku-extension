@@ -1,7 +1,7 @@
 {
   "name": "All In Danmaku",
-  "version": "0.3.3",
-  "description": "Turn all danmaku together! Enable danmaku by toggling the switcher under video and manually enter your targeting bvID (until now).",
+  "version": "0.4.0",
+  "description": "Turn all danmaku together! Enable danmaku by toggling the switcher under video and selecting the resource you like!",
   "manifest_version": 3,
   "permissions": [
     "storage",
