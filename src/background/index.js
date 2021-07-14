@@ -64,30 +64,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({farewell: 'invalid'})
         return true
     }
-
-    /*fetchDanmaku(message).then(({data, status}) => {
-        chrome.storage.local.set({danmakuData: data}, () => {
-            console.log('data fetched successfully')
-        })
-        tabRequestResponse(sender)
-    }, (err) => {
-        throw err
-    })*/
-    /*axios.get('/view', {
-        baseURL: 'https://api.bilibili.com/x/web-interface',
-        params: {
-            bvid: message
-        }
-    }).then((response) => {
-        console.log(response.data.data.cid)
-    })*/
 })
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.url) {
         console.log('url changed.')
         chrome.tabs.sendMessage( tabId, {
-            message: 'resetStatus'
+            message: 'resetStatus',
+            url: changeInfo.url
         })
     }
 })
