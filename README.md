@@ -2,6 +2,8 @@
 
 ![release](https://img.shields.io/github/v/release/Privoce/all-in-danmaku-extension?include_prereleases)
 
+**Back-end project**: [all-in-danmaku-server](https://github.com/Privoce/all-in-danmaku-server).
+
 Turn all danmaku together! Enable danmaku by toggling the switcher under video and selecting the resource you like!
 
 ### v0.4.0-alpha updates:
