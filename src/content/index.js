@@ -163,8 +163,8 @@ class DanmakuLayer extends React.Component {
                 bvid: null,
                 danmakuList: null,
                 screen: null,
-                width: this.VT.style.height,
-                height: this.VT.style.width,
+                width: this.VT.style.width,
+                height: this.VT.style.height,
                 msg:null,
             })
         })
