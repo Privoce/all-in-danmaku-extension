@@ -564,8 +564,14 @@ class DanmakuSwitcher extends React.Component {
         this.setState({checked: event.target.checked})
         if (event.target.checked) {
             if (!globalLayerMounted) {
+                parentVideoContainer = document.querySelector(".html5-video-container")
+                abstractLayer = document.createElement('div')
+                abstractLayer.id = 'danmaku-abstract-layer'
+                abstractLayer.className = 'extension-top-layer'
+                parentVideoContainer.appendChild(abstractLayer)
                 ReactDOM.render(<DanmakuLayer value={currentVideoName}/>, abstractLayer);
                 globalLayerMounted = 1
+                globalComponentLoaded = 1
             }
             console.log('danmakuon')
             eventEmitter.emit('danmakuon')
@@ -613,7 +619,9 @@ function DanmakuToolBar(props) {
     )
 }
 
-//ReactDOM.render(<DanmakuToolBar />, toolBar)
+referenceBar = document.getElementById('info-contents')
+infoBar.insertBefore(toolBar, referenceBar)
+ReactDOM.render(<DanmakuToolBar />, toolBar)
 //ReactDOM.render(<DanmakuLayer value={currentVideoName}/>, abstractLayer);
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
