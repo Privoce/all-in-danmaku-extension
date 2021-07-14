@@ -311,7 +311,7 @@ class DanmakuLayer extends React.Component {
                     this.fetchedBlocks = this.state.blocks
                 }
                 if (newIndex === -1) return;
-                if (this.state.danmakuList[newIndex].progress - this.state.danmakuList[playBackIndex].progress > 10000
+                if (this.state.danmakuList[newIndex].progress - this.state.danmakuList[playBackIndex].progress > 8000
                     || newIndex < playBackIndex) { // 10s
                     console.log('refresh')
                     this.state.screen.clear()
@@ -320,9 +320,13 @@ class DanmakuLayer extends React.Component {
                 } else {
                     console.log('push')
                     while (playBackIndex < newIndex) {
+                        // console.log('push' + this.state.danmakuList[playBackIndex].progress.toString())
+                        console.log(this.state.danmakuList[playBackIndex].progress)
+                        console.log(playBackIndex)
                         this.state.screen.push(
                             <StyledDanmaku
                                 size="normal"
+                                color={'#' + this.state.danmakuList[playBackIndex].color.toString(16)}
                                 msg={this.state.danmakuList[playBackIndex].content}
                             />
                         );
@@ -343,6 +347,7 @@ class DanmakuLayer extends React.Component {
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevState.width !== this.state.width || prevState.height !== this.state.height) {
+            if (this.state.screen) this.state.screen.clear()
             const s = new BulletScreen(document.querySelector('.screen'), {duration: 6, trackHeight: 30})
             this.setState({screen: s})
         }
