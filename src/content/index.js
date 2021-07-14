@@ -81,14 +81,6 @@ function getVideoPlayer() {
 let VT = getVideoPlayer()
 let playBackIndex = 0
 
-let value = "test";
-chrome.storage.local.set({videoname: value}, () => {
-    console.log('Value is set to ' + value);
-})
-chrome.storage.local.get(['videoname'], (result) => {
-    console.log('Value currently is ' + result.videoname);
-});
-
 const switcher = document.getElementById('all-in-danmaku-switcher')
 
 let parentVideoContainer = document.querySelector(".html5-video-container")
@@ -594,7 +586,7 @@ class DanmakuSendBar extends React.Component {
         this.setState({alphaValue:event.target.value === '' ? '' : Number(event.target.value)})
     }
 
-    handleBlur(){
+    handleBlur(value){
         if (value < 0) {
             this.setState({alphaValue:0});
         } else if (value > 1) {
@@ -901,7 +893,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 })
 eventEmitter.addListener('reset', () => {
-    // VT = getVideoPlayer()
     videoTitle = document.querySelector('meta[name~="title"]')
     currentVideoName = videoTitle && videoTitle.getAttribute("content")
     globalDanmakuFetched = 0
