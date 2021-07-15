@@ -92,6 +92,7 @@ class DanmakuSendBar extends React.Component {
         const sendDanmaku = (msg) => {
             return () => {
                 // 触发自定义事件
+
                 eventEmitter.emit("sendDanmaku",msg,this.state.colorValue,this.state.alphaValue,this.state.sizeValue)
             }
         }
@@ -199,6 +200,12 @@ class DanmakuSendBar extends React.Component {
                     placeholder="Send a friendly danmaku"
                     inputProps={{ 'aria-label': 'Send a friendly danmaku'}}
                     onChange={this.handleChange}
+                    onKeyPress={(event) => {
+                        if (event.key === 'Enter') {
+                            event.preventDefault()
+                            sendDanmaku(this.state.msg)();
+                        }
+                    }}
                 />
                 {/*<IconButton type="submit" className="danmaku-sendbar-iconButton" aria-label="search">*/}
                 {/*    <SearchIcon />*/}

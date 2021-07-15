@@ -200,6 +200,7 @@ class DanmakuLayer extends React.Component {
         this.VT.ontimeupdate = () => {
             if (Array.isArray(this.state.danmakuList) && this.state.screen) {
                 const newIndex = this.state.danmakuList.findIndex((element) => {
+                    console.log(element)
                     return element.progress > Math.floor(this.VT.currentTime * 1000)}
 
                 )
