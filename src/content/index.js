@@ -131,7 +131,7 @@ class DanmakuLayer extends React.Component {
                 console.log("msg received")
                 this.state.screen.push(<StyledDanmaku
                     size={size}
-                    alpha={this.state.alpha}
+                    alpha={this.alpha}
                     color={color}
                     msg={msg}
                 />);
@@ -236,7 +236,7 @@ class DanmakuLayer extends React.Component {
                                     size="normal"
                                     color={'#' + this.state.danmakuList[playBackIndex].color.toString(16)}
                                     msg={this.state.danmakuList[playBackIndex].content}
-                                    aplha={this.alpha}
+                                    alpha={this.alpha}
                                 />
                             );
                         }
@@ -256,7 +256,7 @@ class DanmakuLayer extends React.Component {
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevState.width !== this.state.width || prevState.height !== this.state.height) {
             if (this.state.screen) this.state.screen.clear()
-            const s = new BulletScreen(document.querySelector('.screen'), {duration: 6, trackHeight: 30})
+            const s = new BulletScreen(document.querySelector('.screen'), {duration: 10, trackHeight: 30})
             this.setState({screen: s})
         }
     }
@@ -291,7 +291,7 @@ class DanmakuLayer extends React.Component {
                         })
                         chrome.storage.local.set({[bvid]: newComingArray})
                         this.setState({danmakuList: newComingArray})
-                        this.setState({screen: new BulletScreen(document.querySelector('.screen'), {duration: 6, trackHeight: 30})})
+                        this.setState({screen: new BulletScreen(document.querySelector('.screen'), {duration: 10, trackHeight: 30})})
                     } else {
                         chrome.storage.local.set({[bvid]: this.state.danmakuList})
                     }
@@ -334,14 +334,13 @@ class DanmakuSearchResultItem extends React.Component {
         return (
                 <ListItem alignItems="flex-start" onClick={this.selectHandler} button>
                     <ListItemText
-                        style={{fontSize: "normal"}}
-                        primary={<h3 dangerouslySetInnerHTML={{__html: this.props.title}}/>}
+                        primary={<h3 style={{fontSize: 16}} dangerouslySetInnerHTML={{__html: this.props.title}}/>}
                         secondary={
                             <React.Fragment>
                                 <Typography
                                     component="span"
                                     variant="body2"
-                                    style={{display: "inline"}}
+                                    style={{display: "inline", fontSize: 14}}
                                     color="textPrimary"
                                 >
                                     {this.props.author}
@@ -415,7 +414,7 @@ function DanmakuSearchBar() {
     return (
         <div className={classes.root}>
             <IconButton className={classes.iconButton}>
-                <MenuIcon />
+                <MenuIcon size="large"/>
             </IconButton>
             <InputBase
                 className={classes.input}
@@ -423,10 +422,11 @@ function DanmakuSearchBar() {
                 inputProps={{ 'aria-label': 'search matching video resource'}}
                 onChange={changeHandler}
                 inputRef={(re) => inputField = re}
+                style={{fontSize: 20}}
             />
             <Divider className={classes.divider} orientation="vertical" />
             <IconButton onClick={searchHandler} className={classes.iconButton} aria-label="search">
-                <SearchIcon />
+                <SearchIcon size={"large"}/>
             </IconButton>
         </div>
     );
@@ -515,6 +515,7 @@ class DanmakuSearchDialog extends React.Component {
                     scroll='paper'
                     maxWidth='md'
                     fullWidth={true}
+                    style={{height: '75vh', top: '13%'}}
                 >
                     <DialogTitle>
                         <DanmakuSearchBar />
