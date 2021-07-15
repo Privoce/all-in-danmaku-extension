@@ -138,6 +138,7 @@ class DanmakuLayer extends React.Component {
                     alpha={this.alpha}
                     color={color}
                     msg={msg}
+                    isMe={true}
                 />);
             }
         });
