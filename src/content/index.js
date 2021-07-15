@@ -151,6 +151,7 @@ class DanmakuLayer extends React.Component {
                 blocks: blocks,
             })
             this.tryGetDanmaku(bvid, 1)
+            this.fetchedBlocks = 1
         })
         this.multiSegmentsHandler = eventEmitter.addListener('continueFetch', (segmentIndex) => {
             this.tryGetDanmaku(this.state.bvid, segmentIndex)
@@ -258,6 +259,11 @@ class DanmakuLayer extends React.Component {
                 chrome.storage.local.get([bvid], (result) => {
                     let newComingArray = result[bvid]
                     if (Array.isArray(newComingArray)) {
+                        for (let item of newComingArray) {
+                            if (!item.progress) {
+                                item.progress = Infinity
+                            }
+                        }
                         if (Array.isArray(this.state.danmakuList)) {
                             console.log('merge')
                             newComingArray = newComingArray.concat(this.state.danmakuList)
