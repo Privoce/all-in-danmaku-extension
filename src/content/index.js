@@ -100,6 +100,10 @@ function durationSegmentConverter(duration) {
     if (isNaN(minute) || isNaN(second)) { return 1; }
     return Math.ceil(minute / 6)
 }
+function durationDisplayConverter(duration) {
+    let times = duration.split(':')
+    return times[0].padStart(2, '0') + ":" + times[1].padStart(2, '0')
+}
 
 class DanmakuLayer extends React.Component {
     constructor(props) {
@@ -348,7 +352,7 @@ class DanmakuSearchResultItem extends React.Component {
 
                                 <Typography style={{display: "flex", alignItems: "center"}}>
                                     <TimerIcon fontSize="small"/>
-                                    <span className="search-result-text-span">{this.props.duration + " "}</span>
+                                    <span className="search-result-text-span">{ durationDisplayConverter(this.props.duration) + " "}</span>
                                     <PlayCircleOutlineIcon fontSize="small"/>
                                     <span className="search-result-text-span">{ playTimesConverter(this.props.times) + " "}</span>
                                     <TodayIcon fontSize="small"/>
