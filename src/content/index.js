@@ -28,6 +28,7 @@ import StyledDanmaku from "@/api/StyledDanmaku";
 import DanmakuSendBar from "@/lib/DanmakuSendBar";
 import DanmakuSideBar from "@/lib/DanmakuSidebar";
 import {eventEmitter} from "@/lib/Helper";
+import DanmakuConfigMenu from "@/lib/DanmakuConfigMenu";
 
 let globalDanmakuFetched = 0;
 let globalComponentLoaded = 0;
@@ -113,6 +114,8 @@ class DanmakuLayer extends React.Component {
             msg:null,
         }
         this.fetchedBlocks = 0
+        this.alpha=1;
+        this.simplify=0;
     }
 
     componentDidMount() {
@@ -120,18 +123,23 @@ class DanmakuLayer extends React.Component {
         console.log(this.VT)
         const switcher = document.getElementById('all-in-danmaku-switcher')
         // 声明一个自定义事件
-        this.eventEmitter = eventEmitter.addListener("sendDanmaku",(msg,color,alpha,size)=>{
+        this.eventEmitter = eventEmitter.addListener("sendDanmaku",(msg,color,size)=>{
             this.setState({
                 msg:msg,
             })
             if(msg){
+                console.log("msg received")
                 this.state.screen.push(<StyledDanmaku
                     size={size}
-                    alpha={alpha}
+                    alpha={this.state.alpha}
                     color={color}
                     msg={msg}
                 />);
             }
+        });
+        this.eventEmitter = eventEmitter.addListener("configChanged",(alpha,simplify)=>{
+            this.alpha=alpha
+            this.simplify=simplify
         });
         this.danmakuOnHandler = eventEmitter.addListener('danmakuon', () => {
             if (globalDanmakuFetched) {
@@ -222,13 +230,16 @@ class DanmakuLayer extends React.Component {
                         // console.log('push' + this.state.danmakuList[playBackIndex].progress.toString())
                         console.log(this.state.danmakuList[playBackIndex].progress)
                         console.log(playBackIndex)
-                        this.state.screen.push(
-                            <StyledDanmaku
-                                size="normal"
-                                color={'#' + this.state.danmakuList[playBackIndex].color.toString(16)}
-                                msg={this.state.danmakuList[playBackIndex].content}
-                            />
-                        );
+                        if(this.state.danmakuList[playBackIndex].weight>this.simplify){
+                            this.state.screen.push(
+                                <StyledDanmaku
+                                    size="normal"
+                                    color={'#' + this.state.danmakuList[playBackIndex].color.toString(16)}
+                                    msg={this.state.danmakuList[playBackIndex].content}
+                                    aplha={this.alpha}
+                                />
+                            );
+                        }
                         playBackIndex += 1;
                     }
                 }
@@ -495,7 +506,7 @@ class DanmakuSearchDialog extends React.Component {
     render() {
         return (
             <div>
-                <IconButton onClick={this.openDialog}>
+                <IconButton onClick={this.openDialog} className={"danmaku-toolbar-iconButton"}>
                     <ReplayIcon />
                 </IconButton>
                 <Dialog
@@ -590,8 +601,8 @@ function DanmakuToolBar(props) {
             <div className="toolbar-right">
                 <DanmakuSearchDialog />
                 <DanmakuSideBar />
+                <DanmakuConfigMenu />
             </div>
-
         </div>
     )
 }
