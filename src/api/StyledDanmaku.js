@@ -7,7 +7,8 @@ const MsgStyle = {
     opacity:'1',
     color: '#FFFFFF',
     textShadow: '1px 1px #000000, 1px -1px #000000, -1px -1px #000000, -1px 1px #000000',
-    fontFamily: 'SimHei'
+    fontFamily: 'SimHei',
+    border: ''
 };
 
 const sizes = {
@@ -17,10 +18,14 @@ const sizes = {
     huge: '16px'
 };
 
-const StyledDanmaku = ({ msg, size = 'small', color , alpha}) => {
+const StyledDanmaku = ({ msg, size = 'small', color , alpha ,isMe=false}) => {
     MsgStyle.opacity=alpha;
     MsgStyle.color=color;
     MsgStyle.fontSize=sizes[size];
+    if (isMe)
+        MsgStyle.border="1px solid rgb(250,0,255)"
+    else
+        MsgStyle.border=''
     return (
         <div>
             <div style={MsgStyle}>{msg}</div>
