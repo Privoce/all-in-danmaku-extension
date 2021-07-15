@@ -124,7 +124,6 @@ class DanmakuLayer extends React.Component {
             this.setState({
                 msg:msg,
             })
-            console.log("msg received: "+msg+" "+color+" "+alpha+" "+size);
             if(msg){
                 this.state.screen.push(<StyledDanmaku
                     size={size}
@@ -132,7 +131,6 @@ class DanmakuLayer extends React.Component {
                     color={color}
                     msg={msg}
                 />);
-                console.log("msg pushed")
             }
         });
         this.danmakuOnHandler = eventEmitter.addListener('danmakuon', () => {

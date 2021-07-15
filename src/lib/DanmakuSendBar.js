@@ -196,25 +196,29 @@ class DanmakuSendBar extends React.Component {
                     )}
                 </Popper>
                 <InputBase
+                    id={"sendbar-input-id"}
                     className="danmaku-sendbar-input"
                     placeholder="Send a friendly danmaku"
                     inputProps={{ 'aria-label': 'Send a friendly danmaku'}}
                     onChange={this.handleChange}
                     onKeyPress={(event) => {
                         if (event.key === 'Enter') {
+                            document.getElementById("sendbar-input-id").value=""
+                            this.setState({msg:""})
                             event.preventDefault()
                             sendDanmaku(this.state.msg)();
                         }
                     }}
                 />
-                {/*<IconButton type="submit" className="danmaku-sendbar-iconButton" aria-label="search">*/}
-                {/*    <SearchIcon />*/}
-                {/*</IconButton>*/}
                 <Divider className="danmaku-sendbar-divider" orientation="vertical" />
                 <IconButton color="primary"
                             className="danmaku-sendbar-iconButton"
                             aria-label="arrowupward"
-                            onClick={sendDanmaku(this.state.msg)}>
+                            onClick={(event)=>{
+                                document.getElementById("sendbar-input-id").value=""
+                                this.setState({msg:""})
+                                sendDanmaku(this.state.msg)()
+                            }}>
                     <ArrowUpwardRoundedIcon fontSize="small"/>
                 </IconButton>
             </Paper>
