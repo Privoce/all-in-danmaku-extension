@@ -65,6 +65,7 @@ class DanmakuConfigMenu extends React.Component {
 
     handleSimplifySliderChange=(event, newValue)=>{
         this.setState({simplifyValue:newValue})
+        eventEmitter.emit("configChanged",this.state.alphaValue,this.state.simplifyValue)
     }
 
     handleAlphaInputChange=(event)=>{

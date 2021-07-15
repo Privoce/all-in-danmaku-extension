@@ -131,9 +131,10 @@ class DanmakuLayer extends React.Component {
                 console.log("msg received")
                 this.state.screen.push(<StyledDanmaku
                     size={size}
-                    alpha={this.state.alpha}
+                    alpha={this.alpha}
                     color={color}
                     msg={msg}
+                    isMe={true}
                 />);
             }
         });
@@ -236,7 +237,7 @@ class DanmakuLayer extends React.Component {
                                     size="normal"
                                     color={'#' + this.state.danmakuList[playBackIndex].color.toString(16)}
                                     msg={this.state.danmakuList[playBackIndex].content}
-                                    aplha={this.alpha}
+                                    alpha={this.alpha}
                                 />
                             );
                         }
