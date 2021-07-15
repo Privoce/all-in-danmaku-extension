@@ -31,7 +31,6 @@ class DanmakuSendBar extends React.Component {
             anchorEl:null,
             open:false,
             sizeValue:"normal",
-            alphaValue:1.0,
             colorValue:"#FFFFFF",
         }
         this.anchorRef = React.createRef();
@@ -68,22 +67,6 @@ class DanmakuSendBar extends React.Component {
         }
     }
 
-    handleAlphaSliderChange=(event, newValue)=>{
-        this.setState({alphaValue:newValue})
-    }
-
-    handleAlphaInputChange=(event)=>{
-        this.setState({alphaValue:event.target.value === '' ? '' : Number(event.target.value)})
-    }
-
-    handleBlur=(value)=>{
-        if (value < 0) {
-            this.setState({alphaValue:0});
-        } else if (value > 1) {
-            this.setState({alphaValue:1})
-        }
-    }
-
     handleColorChange=(event)=>{
         this.setState({colorValue:event.target.value})
     }
@@ -93,7 +76,7 @@ class DanmakuSendBar extends React.Component {
             return () => {
                 // 触发自定义事件
 
-                eventEmitter.emit("sendDanmaku",msg,this.state.colorValue,this.state.alphaValue,this.state.sizeValue)
+                eventEmitter.emit("sendDanmaku",msg,this.state.colorValue,this.state.sizeValue)
             }
         }
         return (
@@ -106,7 +89,7 @@ class DanmakuSendBar extends React.Component {
                             onClick={this.handleToggle}>
                     <MenuIcon fontsize="small"/>
                 </IconButton>
-                <Popper open={this.state.open} anchorEl={this.anchorRef.current} role={undefined} transition disablePortal>
+                <Popper open={this.state.open} anchorEl={this.anchorRef.current} role={undefined} transition disablePortal style={{zIndex:100}}>
                     {({ TransitionProps, placement }) => (
                         <Grow
                             {...TransitionProps}
@@ -136,43 +119,6 @@ class DanmakuSendBar extends React.Component {
                                             </FormControl>
                                         </StyledMenuItem>
                                         <StyledMenuItem>
-                                            <div style={{width:150}}>
-                                                <Typography id="input-slider" gutterBottom>
-                                                    Alpha
-                                                </Typography>
-                                                <Grid container spacing={2} alignItems="center">
-                                                    <Grid item xs>
-                                                        <Slider
-                                                            value={typeof this.state.alphaValue === 'number' ? this.state.alphaValue : 1}
-                                                            defaultValue={1}
-                                                            step={0.1}
-                                                            min={0}
-                                                            max={1}
-                                                            onChange={this.handleAlphaSliderChange}
-                                                            aria-labelledby="input-slider"
-                                                            style={{width:85}}
-                                                        />
-                                                    </Grid>
-                                                    <Grid item>
-                                                        <Input
-                                                            value={this.state.alphaValue}
-                                                            margin="dense"
-                                                            onChange={this.handleAlphaInputChange}
-                                                            onBlur={this.handleBlur}
-                                                            inputProps={{
-                                                                step: 0.1,
-                                                                min: 0,
-                                                                max: 1,
-                                                                type: 'number',
-                                                                'aria-labelledby': 'input-slider',
-                                                            }}
-                                                            style={{width:42}}
-                                                        />
-                                                    </Grid>
-                                                </Grid>
-                                            </div>
-                                        </StyledMenuItem>
-                                        <StyledMenuItem>
                                             <FormControl>
                                                 <InputLabel >Color</InputLabel>
                                                 <Select
@@ -196,25 +142,29 @@ class DanmakuSendBar extends React.Component {
                     )}
                 </Popper>
                 <InputBase
+                    id={"sendbar-input-id"}
                     className="danmaku-sendbar-input"
                     placeholder="Send a friendly danmaku"
                     inputProps={{ 'aria-label': 'Send a friendly danmaku'}}
                     onChange={this.handleChange}
                     onKeyPress={(event) => {
                         if (event.key === 'Enter') {
+                            document.getElementById("sendbar-input-id").value=""
+                            this.setState({msg:""})
                             event.preventDefault()
                             sendDanmaku(this.state.msg)();
                         }
                     }}
                 />
-                {/*<IconButton type="submit" className="danmaku-sendbar-iconButton" aria-label="search">*/}
-                {/*    <SearchIcon />*/}
-                {/*</IconButton>*/}
                 <Divider className="danmaku-sendbar-divider" orientation="vertical" />
                 <IconButton color="primary"
                             className="danmaku-sendbar-iconButton"
                             aria-label="arrowupward"
-                            onClick={sendDanmaku(this.state.msg)}>
+                            onClick={(event)=>{
+                                document.getElementById("sendbar-input-id").value=""
+                                this.setState({msg:""})
+                                sendDanmaku(this.state.msg)()
+                            }}>
                     <ArrowUpwardRoundedIcon fontSize="small"/>
                 </IconButton>
             </Paper>

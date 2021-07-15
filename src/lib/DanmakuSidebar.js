@@ -99,7 +99,7 @@ class DanmakuSideBar extends React.Component {
         return (
             <div>
                 <React.Fragment key={'right'}>
-                    <IconButton onClick={this.toggleSidebar(true)} style={{padding: 10}}>
+                    <IconButton onClick={this.toggleSidebar(true)} className={"danmaku-toolbar-iconButton"}>
                         <ListIcon />
                     </IconButton>
                     <Drawer anchor={'right'} open={this.state.display} onClose={this.toggleSidebar(false)} className="sidedrawer">
